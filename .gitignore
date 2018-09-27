@@ -1,0 +1,8 @@
+.DS_Store
+
+GPATH
+GRTAGS
+GTAGS
+
+__pycache__
+model

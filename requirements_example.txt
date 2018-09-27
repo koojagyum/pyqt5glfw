@@ -1,0 +1,7 @@
+dlib
+matplotlib
+numpy
+opencv-python
+Pillow
+PyOpenGL
+pyqt5
