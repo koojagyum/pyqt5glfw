@@ -1,13 +1,13 @@
 import argparse
 import cv2
 import glob
+import errno
 import math
 import numpy as np
 import os
 
 from .detector import FaceDetector
-from utils.filesys import filename_of
-from utils.filesys import mkdirp
+
 
 verbose = False
 
@@ -15,6 +15,18 @@ verbose = False
 def debug(msg):
     if verbose:
         print(msg)
+
+
+def filename_of(path):
+    return os.path.split(path)[-1]
+
+
+def mkdirp(path):
+    try:
+        os.makedirs(path)
+    except OSError as exc:
+        if exc.errno == errno.EEXIST and os.path.isdir(path):
+            pass
 
 
 def correct_roll(image, shape):

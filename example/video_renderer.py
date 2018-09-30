@@ -1,10 +1,10 @@
 import cv2
 import sys
 
+from facelm.webcam import FPSChecker
 from PyQt5.QtWidgets import QApplication
 from pyglfw.renderer import TextureRenderer
 from pyqt5glfw.glwidget import GLWidget
-from utils.cvutils import Webcam, FPSChecker
 
 
 verbose = False
@@ -42,6 +42,8 @@ class VideoRenderer(TextureRenderer):
 
 
 def test_webcam():
+    from facelm.webcam import Webcam
+
     app = QApplication(sys.argv)
 
     w = GLWidget()
@@ -61,13 +63,13 @@ def test_webcam():
 
 
 def test_livelm():
+    from facelm.detector import FaceDetector
+    from facelm.webcam import Webcam
+
     app = QApplication(sys.argv)
 
     w = GLWidget()
     w.show()
-
-    from facelm.detector import FaceDetector
-    from utils.cvutils import Webcam
 
     with Webcam() as webcam:
         detector = FaceDetector()
