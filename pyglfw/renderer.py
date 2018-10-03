@@ -15,7 +15,15 @@ def resource_path(relpath):
 
 class Renderer:
 
-    def __init__(self, vs_path, fs_path, gs_path=None, name=''):
+    default_vs_path = resource_path('./shader/basic.vs')
+    default_fs_path = resource_path('./shader/basic.fs')
+
+    def __init__(
+            self,
+            vs_path=default_vs_path,
+            fs_path=default_fs_path,
+            gs_path=None,
+            name=''):
         self.name = name
         self._vs_path = vs_path
         self._fs_path = fs_path
@@ -74,13 +82,8 @@ class RendererGroup(Renderer):
 
 class TriangleRenderer(Renderer):
 
-    default_vs_path = resource_path('./shader/basic.vs')
-    default_fs_path = resource_path('./shader/basic.fs')
-
     def __init__(self, name=''):
         super().__init__(
-            vs_path=self.__class__.default_vs_path,
-            fs_path=self.__class__.default_fs_path,
             name=name
         )
         self._vertex_object = None
@@ -108,13 +111,8 @@ class TriangleRenderer(Renderer):
 
 class RectangleRenderer(Renderer):
 
-    default_vs_path = resource_path('./shader/basic.vs')
-    default_fs_path = resource_path('./shader/basic.fs')
-
     def __init__(self, name=''):
         super().__init__(
-            vs_path=self.default_vs_path,
-            fs_path=self.default_fs_path,
             name=name
         )
         self._vertex_object = None
