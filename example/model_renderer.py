@@ -1,4 +1,6 @@
 import argparse
+import math
+import numpy as np
 import sys
 
 from pyglfw.model import load_fromjson
@@ -18,9 +20,13 @@ def debug(msg):
 def test_model_json(jsonpath):
     app = QApplication(sys.argv)
 
-    w = GLWidget()
     model = load_fromjson(jsonpath)
-    w.renderer = ModelRenderer(model=model)
+    renderer = ModelRenderer(model=model)
+    renderer.camera.yaw = math.radians(90.0)
+    renderer.camera.position = np.array([0.0, 0.0, -1.0], dtype=np.float32)
+
+    w = GLWidget()
+    w.renderer = renderer
     w.show()
 
     sys.exit(app.exec_())
