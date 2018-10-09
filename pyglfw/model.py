@@ -1,15 +1,11 @@
+import json
 import numpy as np
-import random
-import sys
 
 from OpenGL.GL import *
 from pyglfw.framework import VertexObject
-from pyglfw.renderer import Renderer
-from PyQt5.QtWidgets import QApplication
-from pyqt5glfw.glwidget import GLWidget
 
 
-verbose = False
+verbose = True
 
 
 def debug(msg):
@@ -17,34 +13,26 @@ def debug(msg):
         print(msg)
 
 
-class CubicModel:
-    cubic_vertices = np.array([
-        [-0.5, -0.5, 0.99],
-        [-0.5, +0.5, 0.01],
-        [+0.5, +0.5, -0.99],
-        [+0.5, -0.5, -1.000],
-        [-0.5, -0.5, 3.5],
-        [-0.5, +0.5, 3.5],
-        [+0.5, +0.5, 3.5],
-        [+0.5, -0.5, 3.5],
-    ], dtype='float32')
+def load_fromjson(jsonpath):
+    with open(jsonpath) as f:
+        desc = json.load(f)
 
-    edges = [
-        [0, 1],
-        [1, 2],
-        [2, 3],
-        [3, 0],
-        [0, 4],
-        [1, 5],
-        [2, 6],
-        [3, 7],
-        [4, 5],
-        [5, 6],
-        [6, 7],
-        [7, 4],
-    ]
+    vertices = desc['vertices']
+    vertices = np.asarray(vertices, dtype=np.float32)
 
-    def __init__(self, color=None):
+    edges = desc['edges']
+    edges = np.asarray(edges, dtype=np.int32)
+
+    color = desc['color']
+    color = np.asarray(color, dtype=np.float32)
+
+    return Model(vertices=vertices, edges=edges, color=color)
+
+
+class Model:
+
+    def __init__(self,
+                 vertices=None, edges=None, color=None):
         self._vertices = None
         self._vertices_pending = None
         self._color_pending = None
@@ -60,7 +48,7 @@ class CubicModel:
         self._vertex_object = None
         self.draw_mode = 'points'
 
-        self.vertices = self.__class__.cubic_vertices
+        self.vertices = vertices
 
     def draw(self, program):
         self._update_geometry()
@@ -69,7 +57,6 @@ class CubicModel:
             return
 
         with self._vertex_object as vo:
-            print(vo.v_count)
             glPointSize(8)
             glDrawArrays(GL_POINTS, 0, vo.v_count)
 
@@ -78,7 +65,6 @@ class CubicModel:
             return
 
         v = self._build_data()
-        print(v)
 
         if self._vertex_object is None:
             self._vertex_object = VertexObject(
@@ -120,8 +106,6 @@ class CubicModel:
     def _concat_withcolors(self, v):
         num = v.shape[0]
         colors = self._get_colors(num)
-        print(v)
-        print(colors)
         return np.column_stack((v, colors))
 
     @property
@@ -144,34 +128,3 @@ class CubicModel:
     def _alignment(self):
         a = [3, 3]
         return a
-
-
-class CubicRenderer(Renderer):
-
-    def __init__(self, name=''):
-        super().__init__(
-            name=name
-        )
-        self.model = CubicModel()
-
-    def render(self):
-        with self._program as p:
-            self.model.draw(p)
-
-    def dispose(self):
-        super().dispose()
-        self.model = None
-
-
-def test_cubic_renderer():
-    app = QApplication(sys.argv)
-
-    w = GLWidget()
-    w.renderer = CubicRenderer()
-    w.show()
-
-    sys.exit(app.exec_())
-
-
-if __name__ == '__main__':
-    test_cubic_renderer()

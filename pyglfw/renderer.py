@@ -1,4 +1,5 @@
 import numpy as np
+import pyrr
 
 from .framework import *
 from OpenGL.GL import *
@@ -226,3 +227,40 @@ class TextureRenderer(Renderer):
     def texture(self, value):
         # texture is a read-only property
         raise AttributeError
+
+
+class ModelRenderer(Renderer):
+
+    default_vs_path = resource_path('./shader/model_color.vs')
+    default_fs_path = resource_path('./shader/model_color.fs')
+
+    def __init__(self, name='', model=None):
+        super().__init__(
+            vs_path=self.default_vs_path,
+            fs_path=self.default_fs_path,
+            name=name
+        )
+        self.model = model
+        self.camera = Camera()
+
+    def prepare(self):
+        super().prepare()
+        with self._program as p:
+            projmat = pyrr.matrix44.create_perspective_projection(
+                    45.0,
+                    1.0/1.0,
+                    0.1,
+                    100.0
+            )
+            p.setMatrix4('projection', projmat)
+
+    def render(self):
+        if self.model is None:
+            return
+
+        with self._program as p:
+            p.setMatrix4('view', self.camera.view_matrix)
+            self.model.draw(p)
+
+    def dispose(self):
+        super().dispose()
