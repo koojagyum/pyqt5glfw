@@ -1,6 +1,7 @@
 import json
 import numpy as np
 import pyrr
+import random
 
 from .framework import Camera
 from OpenGL.GL import *
@@ -21,14 +22,14 @@ def load_fromjson(jsonpath):
     with open(jsonpath) as f:
         desc = json.load(f)
 
-    vertices = desc['vertices']
-    vertices = np.asarray(vertices, dtype=np.float32)
+    def _pick(key, dic, dtype=np.float32):
+        if key not in dic:
+            return None
+        return np.asarray(dic[key], dtype=dtype)
 
-    edges = desc['edges']
-    edges = np.asarray(edges, dtype=np.int32)
-
-    color = desc['color']
-    color = np.asarray(color, dtype=np.float32)
+    vertices = _pick('vertices', desc, dtype=np.float32)
+    edges = _pick('edges', desc, dtype=np.int32)
+    color = _pick('color', desc, dtype=np.float32)
 
     return Model(vertices=vertices, edges=edges, color=color)
 
