@@ -28,7 +28,7 @@ def load_fromjson(jsonpath):
         return np.asarray(dic[key], dtype=dtype)
 
     vertices = _pick('vertices', desc, dtype=np.float32)
-    edges = _pick('edges', desc, dtype=np.int32)
+    edges = _pick('edges', desc, dtype=np.uint8)
     color = _pick('color', desc, dtype=np.float32)
 
     return Model(vertices=vertices, edges=edges, color=color)
@@ -54,6 +54,7 @@ class Model:
         self.draw_mode = 'points'
 
         self.vertices = vertices
+        self.edges = edges
 
     def draw(self, program):
         self._update_geometry()
@@ -64,6 +65,8 @@ class Model:
         with self._vertex_object as vo:
             glPointSize(8)
             glDrawArrays(GL_POINTS, 0, vo.v_count)
+            if self.edges is not None:
+                glDrawElements(GL_LINES, vo.count, GL_UNSIGNED_BYTE, None)
 
     def _update_geometry(self):
         if not self._check_pending_data():
@@ -74,7 +77,8 @@ class Model:
         if self._vertex_object is None:
             self._vertex_object = VertexObject(
                 v,
-                self._alignment
+                self._alignment,
+                indices=self.edges
             )
         else:
             self._vertex_object.update(v)
