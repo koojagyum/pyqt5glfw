@@ -135,7 +135,8 @@ class Model:
 
     @property
     def _alignment(self):
-        a = [3, 3]
+        column_dim = self.vertices.shape[1]
+        a = [column_dim, 3]
         return a
 
 
