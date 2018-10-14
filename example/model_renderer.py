@@ -66,6 +66,33 @@ def test_model_attr(jsonpath):
     sys.exit(app.exec_())
 
 
+def test_model_textbook(jsonpath):
+    frame_size = (640, 480)
+
+    app = QApplication(sys.argv)
+
+    model = load_fromjson(jsonpath)
+    renderer = ModelRenderer(model=model)
+    renderer.camera.yaw = math.radians(-90.0)
+    renderer.camera.position = np.array(
+        [57.0, 41.0, 247.0], dtype=np.float32
+    )
+    renderer.camera.SPEED = 3.0
+    renderer.camera.set_projection(
+        aspect_ratio=frame_size[0]/frame_size[1],
+        far_distance=1000.0,
+        near_distance=0.1
+    )
+
+    w = GLWidget()
+    w.renderer = renderer
+    w.keyPressed.connect(renderer.camera.key_pressed)
+    w.resize(frame_size[0], frame_size[1])
+    w.show()
+
+    sys.exit(app.exec_())
+
+
 def main():
     global verbose
 
@@ -88,7 +115,8 @@ def main():
     filepath = args.filepath
 
     # test_model_attr(filepath)
-    test_model_json(filepath)
+    # test_model_json(filepath)
+    test_model_textbook(filepath)
 
 
 if __name__ == '__main__':
