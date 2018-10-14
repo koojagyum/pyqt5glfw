@@ -102,7 +102,7 @@ class TriangleRenderer(Renderer):
     def render(self):
         with self._program:
             with self._vertex_object as vo:
-                glDrawArrays(GL_TRIANGLES, 0, vo.count)
+                glDrawArrays(GL_TRIANGLES, 0, vo.element_count)
 
     def dispose(self):
         super().dispose()
@@ -139,7 +139,7 @@ class RectangleRenderer(Renderer):
             with self._vertex_object as vo:
                 glDrawElements(
                     GL_TRIANGLES,
-                    vo.count,
+                    vo.element_count,
                     GL_UNSIGNED_BYTE,
                     None
                 )
@@ -206,7 +206,7 @@ class TextureRenderer(Renderer):
                     program.setInt('inputTexture', tex.unit_number)
                     glDrawElements(
                         GL_TRIANGLES,
-                        vo.count,
+                        vo.element_count,
                         GL_UNSIGNED_BYTE,
                         None
                     )

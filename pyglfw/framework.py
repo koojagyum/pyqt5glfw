@@ -69,6 +69,10 @@ class VertexObject:
     # alignment: int Python array
     # indices: uint8 numpy array
     def __init__(self, vertices, alignment, indices=None):
+        self._vbo = 0
+        self._vao = 0
+        self._index_object = None
+
         total = 0
         for part in alignment:
             total = total + part
@@ -81,55 +85,40 @@ class VertexObject:
         self._size = vertices.size
         self._stride = total
         self._attribute_count = len(alignment)
-        self.v_count = int(vertices.size / self._stride)
+        self._vertex_count = int(vertices.size / self._stride)
 
         self._vao = glGenVertexArrays(1)
-        glBindVertexArray(self._vao)
-
-        self._ebo = None
-        if indices is not None and indices.size > 0:
-            self.count = indices.size
-            self._ebo = glGenBuffers(1)
-            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, self._ebo)
+        with self:
+            self._vbo = glGenBuffers(1)
+            glBindBuffer(GL_ARRAY_BUFFER, self._vbo)
             glBufferData(
-                GL_ELEMENT_ARRAY_BUFFER,
-                indices,
+                GL_ARRAY_BUFFER,
+                vertices,
                 GL_STATIC_DRAW
             )
-        else:
-            self.count = self.v_count
 
-        self._vbo = glGenBuffers(1)
-        glBindBuffer(GL_ARRAY_BUFFER, self._vbo)
-        glBufferData(
-            GL_ARRAY_BUFFER,
-            vertices,
-            GL_STATIC_DRAW
-        )
+            for i in range(self._attribute_count):
+                glVertexAttribPointer(
+                    i,
+                    alignment[i],
+                    GL_FLOAT,
+                    False,
+                    self._stride * ctypes.sizeof(ctypes.c_float),
+                    ctypes.c_void_p(
+                        offsetof(i, alignment) * ctypes.sizeof(ctypes.c_float)
+                    )
+                )
+                glEnableVertexAttribArray(i)  # Unordered layout would not work!
 
-        for i in range(self._attribute_count):
-            glVertexAttribPointer(
-                i,
-                alignment[i],
-                GL_FLOAT,
-                False,
-                self._stride * ctypes.sizeof(ctypes.c_float),
-                ctypes.c_void_p(
-                    offsetof(i, alignment) * ctypes.sizeof(ctypes.c_float))
-            )
-            glEnableVertexAttribArray(i)  # Unordered layout would not work!
+        if indices is not None and indices.size > 0:
+            self.index_object = IndexObject(indices)
 
-        glBindVertexArray(0)
-        glBindBuffer(GL_ARRAY_BUFFER, 0)
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0)
-        debug('vo {} is created ({}, {}, {})'.
-              format(self, self._vbo, self._ebo, self._vao))
+        debug('vo {} is created VAO({}), VBO({})'.
+              format(self, self._vao, self._vbo))
 
     def __del__(self):
         if self._vbo is not None:
             glDeleteBuffers(1, np.array([self._vbo]))
-        if self._ebo is not None:
-            glDeleteBuffers(1, np.array([self._ebo]))
         if self._vao is not None:
             glDeleteVertexArrays(1, np.array([self._vao]))
         debug('vo {} is deleted'.format(self))
@@ -152,6 +141,76 @@ class VertexObject:
             GL_STATIC_DRAW
         )
         glBindBuffer(GL_ARRAY_BUFFER, 0)
+
+    @property
+    def index_object(self):
+        return self._index_object
+
+    @index_object.setter
+    def index_object(self, value):
+        self._index_object = value
+        with(self):
+            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, value.id)
+
+    @property
+    def vertex_count(self):
+        return self._vertex_count
+
+    @property
+    def element_count(self):
+        if self.index_object is not None:
+            return self.index_object.count
+        return 0
+
+
+class IndexObject:
+
+    def __init__(self, indices):
+        self._id = 0
+        self.update(indices)
+        debug('eo {} is created EBO({})'.format(self, self.id))
+
+    def __del__(self):
+        if self._id > 0:
+            glDeleteBuffers(1, np.array([self.id]))
+        debug('eo {} is deleted'.format(self))
+
+    def update(self, indices):
+        if self._id is 0:
+            self._id = glGenBuffers(1)
+
+        self._count = indices.size
+        with self:
+            glBufferData(
+                GL_ELEMENT_ARRAY_BUFFER,
+                indices,
+                GL_STATIC_DRAW
+            )
+
+    def __enter__(self):
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, self.id)
+        return self
+
+    def __exit__(self, exc_type, exc_value, tb):
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0)
+
+    @property
+    def count(self):
+        return self._count
+
+    @count.setter
+    def count(self, value):
+        # count is a read-only property
+        raise AttributeError
+
+    @property
+    def id(self):
+        return self._id
+
+    @id.setter
+    def id(self, value):
+        # id is a read-only property
+        raise AttributeError
 
 
 class Texture:

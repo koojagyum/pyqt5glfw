@@ -64,9 +64,9 @@ class Model:
 
         with self._vertex_object as vo:
             glPointSize(8)
-            glDrawArrays(GL_POINTS, 0, vo.v_count)
+            glDrawArrays(GL_POINTS, 0, vo.vertex_count)
             if self.edges is not None:
-                glDrawElements(GL_LINES, vo.count, GL_UNSIGNED_BYTE, None)
+                glDrawElements(GL_LINES, vo.element_count, GL_UNSIGNED_BYTE, None)
 
     def _update_geometry(self):
         if not self._check_pending_data():
