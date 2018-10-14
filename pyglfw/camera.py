@@ -25,6 +25,18 @@ class Camera:
         self.yaw = math.radians(-90.0)
         self.pitch = math.radians(0.0)
 
+        self.set_projection()
+
+    def set_projection(
+            self,
+            fov=45.0,
+            aspect_ratio=1.0/1.0,
+            near_distance = 0.1,
+            far_distance = 100.0):
+        self._proj_matrix = pyrr.matrix44.create_perspective_projection(
+            fov, aspect_ratio, near_distance, far_distance
+        )
+
     @property
     def front(self):
         return np.array(
@@ -52,3 +64,7 @@ class Camera:
             target,
             self.up
         )
+
+    @property
+    def proj_matrix(self):
+        return self._proj_matrix

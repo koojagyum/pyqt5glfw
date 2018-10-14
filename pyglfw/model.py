@@ -237,14 +237,7 @@ class ModelRenderer(Renderer):
     def prepare(self):
         super().prepare()
         with self._program as p:
-            # This would better lie in Camera object
-            projmat = pyrr.matrix44.create_perspective_projection(
-                    45.0,
-                    1.0/1.0,
-                    0.1,
-                    100.0
-            )
-            p.setMatrix4('projection', projmat)
+            p.setMatrix4('projection', self.camera.proj_matrix)
 
         if self.model is not None:
             self.model.prepare()
