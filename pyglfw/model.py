@@ -3,7 +3,7 @@ import numpy as np
 import pyrr
 import random
 
-from .framework import Camera
+from .camera import Camera
 from OpenGL.GL import *
 from pyglfw.framework import IndexObject
 from pyglfw.framework import VertexObject
