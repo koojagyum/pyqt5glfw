@@ -33,7 +33,20 @@ def load_fromjson(jsonpath):
     faces = _pick('faces', desc, dtype=np.uint8)
     color = _pick('color', desc, dtype=np.float32)
 
-    return Model(vertices=vertices, edges=edges, faces=faces, color=color)
+    attrs = None
+    key_attr = 'attributes'
+    if key_attr in desc:
+        attrs = desc[key_attr]
+        for key, value in attrs.items():
+            attrs[key] = np.array(value, dtype=np.float32)
+
+    return Model(
+        vertices=vertices,
+        edges=edges,
+        faces=faces,
+        color=color,
+        attributes=attrs
+    )
 
 
 class Model:
@@ -43,10 +56,23 @@ class Model:
                  edges=None, faces=None,
                  color=None, attributes=None):
         self._vertices = None
+        self._color = None
+        self._attrs = None
         self._vertices_pending = None
         self._color_pending = None
+        self._attrs_pending = None
 
-        if color is None:
+        self._vertex_object = None
+        self._indexobj_edges = None
+        self._indexobj_faces = None
+
+        self.draw_mode = 'points'
+
+        self.vertices = vertices
+        self.attrs = attributes
+
+        if color is None and attributes is None:
+            print('random color')
             color = (
                 random.random(),
                 random.random(),
@@ -54,16 +80,8 @@ class Model:
             )
         self.color = color
 
-        self._vertex_object = None
-        self.draw_mode = 'points'
-
-        self.vertices = vertices
-
         self._edges = edges
         self._faces = faces
-
-        self._indexobj_edges = None
-        self._indexobj_faces = None
 
     def prepare(self):
         if self._edges is not None:
@@ -112,8 +130,10 @@ class Model:
             self._vertex_object.update(v)
 
     def _check_pending_data(self):
-        if self._vertices_pending is None and \
-           self._color_pending is None:
+        pending_check = self._vertices_pending is None and \
+                        self._color_pending is None and \
+                        self._attrs_pending is None
+        if pending_check:
             return False
 
         if self._vertices_pending is not None:
@@ -129,11 +149,20 @@ class Model:
             self._color = self._color_pending
             self._color_pending = None
 
+        if self._attrs_pending is not None:
+            self._attrs = self._attrs_pending
+            self._attrs_pending = None
+
         return True
 
     def _build_data(self):
-        v = self._concat_withcolors(self.vertices)
-        return v
+        if self.color is not None:
+            return self._concat_withcolors(self.vertices)
+        else:
+            return self._concat_withattrs(
+                self.vertices,
+                self.attrs.values()
+            )
 
     def _get_colors(self, num):
         color = np.array((self.color), dtype='float32')
@@ -144,6 +173,12 @@ class Model:
         num = v.shape[0]
         colors = self._get_colors(num)
         return np.column_stack((v, colors))
+
+    def _concat_withattrs(self, v, attrs):
+        data = v
+        for attr in attrs:
+            data = np.column_stack((data, attr))
+        return data
 
     @property
     def vertices(self):
@@ -160,11 +195,28 @@ class Model:
     @color.setter
     def color(self, value):
         self._color_pending = value
+        if value is not None:
+            self._attrs_pending = None
+
+    @property
+    def attrs(self):
+        return self._attrs
+
+    @attrs.setter
+    def attrs(self, value):
+        self._attrs_pending = value
+        if value is not None:
+            self._color_pending = None
 
     @property
     def _alignment(self):
-        column_dim = self.vertices.shape[1]
-        a = [column_dim, 3]
+        if self.color is not None:
+            return [self.vertices.shape[1], 3]
+
+        a = [self.vertices.shape[1]]
+        for v in self.attrs.values():
+            a.append(v.shape[1])
+
         return a
 
 
