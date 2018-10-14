@@ -2,6 +2,8 @@ import math
 import numpy as np
 import pyrr
 
+from PyQt5.QtCore import Qt
+
 
 verbose = False
 
@@ -13,6 +15,11 @@ def debug(msg):
 
 class Camera:
 
+    PITCH = math.radians(0.0)
+    YAW = math.radians(-90.0)
+    SPEED = 3.0 * 0.1
+    SPEED_ROTATION = math.radians(3.0)
+
     def __init__(self):
         self.position = np.array(
             [0.0, 0.0, 3.0],
@@ -22,8 +29,8 @@ class Camera:
             [0.0, 1.0, 0.0],
             dtype=np.float32
         )
-        self.yaw = math.radians(-90.0)
-        self.pitch = math.radians(0.0)
+        self.yaw = Camera.YAW
+        self.pitch = Camera.PITCH
 
         self.set_projection()
 
@@ -36,6 +43,27 @@ class Camera:
         self._proj_matrix = pyrr.matrix44.create_perspective_projection(
             fov, aspect_ratio, near_distance, far_distance
         )
+
+    def key_pressed(self, key, shift):
+        debug('key_pressed: {}/{}'.format(key, shift))
+        if not shift:
+            if key == Qt.Key_A:
+                self.position -= self.right * Camera.SPEED
+            elif key == Qt.Key_D:
+                self.position += self.right * Camera.SPEED
+            elif key == Qt.Key_S:
+                self.position -= self.front * Camera.SPEED
+            elif key == Qt.Key_W:
+                self.position += self.front * Camera.SPEED
+        else:
+            if key == Qt.Key_A:
+                self.yaw += Camera.SPEED_ROTATION
+            elif key == Qt.Key_D:
+                self.yaw -= Camera.SPEED_ROTATION
+            elif key == Qt.Key_S:
+                self.pitch -= Camera.SPEED_ROTATION
+            elif key == Qt.Key_W:
+                self.pitch += Camera.SPEED_ROTATION
 
     @property
     def front(self):

@@ -3,7 +3,9 @@ import pyglfw
 import OpenGL.GL as gl
 import sys
 
+from PyQt5.QtCore import pyqtSignal
 from PyQt5.QtCore import QPoint, QSize
+from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QColor
 from PyQt5.QtWidgets import QApplication, QOpenGLWidget, QWidget
 
@@ -17,6 +19,8 @@ def debug(msg):
 
 
 class GLWidget(QOpenGLWidget):
+
+    keyPressed = pyqtSignal(int, bool)
 
     def __init__(self, parent=None):
         super(GLWidget, self).__init__(parent)
@@ -92,6 +96,12 @@ class GLWidget(QOpenGLWidget):
 
     def mouseMoveEvent(self, event):
         self.lastPos = event.pos()
+
+    def keyPressEvent(self, event):
+        super(GLWidget, self).keyPressEvent(event)
+        shift = event.modifiers() & Qt.ShiftModifier
+        self.keyPressed.emit(event.key(), shift)
+        self.update()
 
     def setClearColor(self, c):
         gl.glClearColor(c.redF(), c.greenF(), c.blueF(), c.alphaF())
