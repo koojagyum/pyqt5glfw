@@ -102,7 +102,7 @@ class TriangleRenderer(Renderer):
     def render(self):
         with self._program:
             with self._vertex_object as vo:
-                glDrawArrays(GL_TRIANGLES, 0, vo.element_count)
+                glDrawArrays(GL_TRIANGLES, 0, vo.vertex_count)
 
     def dispose(self):
         super().dispose()
