@@ -39,7 +39,9 @@ def load_fromjson(jsonpath):
 class Model:
 
     def __init__(self,
-                 vertices=None, edges=None, faces=None, color=None):
+                 vertices=None,
+                 edges=None, faces=None,
+                 color=None, attributes=None):
         self._vertices = None
         self._vertices_pending = None
         self._color_pending = None
@@ -56,17 +58,18 @@ class Model:
         self.draw_mode = 'points'
 
         self.vertices = vertices
-        self.edges = edges
-        self.faces = faces
+
+        self._edges = edges
+        self._faces = faces
 
         self._indexobj_edges = None
         self._indexobj_faces = None
 
     def prepare(self):
-        if self.edges is not None:
-            self._indexobj_edges = IndexObject(self.edges)
-        if self.faces is not None:
-            self._indexobj_faces = IndexObject(self.faces)
+        if self._edges is not None:
+            self._indexobj_edges = IndexObject(self._edges)
+        if self._faces is not None:
+            self._indexobj_faces = IndexObject(self._faces)
 
     def draw(self, program):
         self._update_geometry()
@@ -77,12 +80,22 @@ class Model:
         with self._vertex_object as vo:
             glPointSize(8)
             glDrawArrays(GL_POINTS, 0, vo.vertex_count)
-            if self.edges is not None:
+            if self._indexobj_edges is not None:
                 with self._indexobj_edges as ebo:
-                    glDrawElements(GL_LINES, ebo.count, GL_UNSIGNED_BYTE, None)
-            if self.faces is not None:
+                    glDrawElements(
+                        GL_LINES,
+                        ebo.count,
+                        GL_UNSIGNED_BYTE,
+                        None
+                    )
+            if self._indexobj_faces is not None:
                 with self._indexobj_faces as ebo:
-                    glDrawElements(GL_TRIANGLES, ebo.count, GL_UNSIGNED_BYTE, None)
+                    glDrawElements(
+                        GL_TRIANGLES,
+                        ebo.count,
+                        GL_UNSIGNED_BYTE,
+                        None
+                    )
 
     def _update_geometry(self):
         if not self._check_pending_data():

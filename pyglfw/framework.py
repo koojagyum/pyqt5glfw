@@ -109,7 +109,8 @@ class VertexObject:
                         offsetof(i, alignment) * ctypes.sizeof(ctypes.c_float)
                     )
                 )
-                glEnableVertexAttribArray(i)  # Unordered layout would not work!
+                # Unordered layout would not work!
+                glEnableVertexAttribArray(i)
 
         if indices is not None and indices.size > 0:
             self.index_object = IndexObject(indices)
@@ -125,7 +126,7 @@ class VertexObject:
         debug('vo {} is deleted'.format(self))
 
     def __enter__(self):
-        self._prev_vao = glGetIntegerv(GL_VERTEX_ARRAY_BINDING);
+        self._prev_vao = glGetIntegerv(GL_VERTEX_ARRAY_BINDING)
         glBindVertexArray(self._vao)
         return self
 
