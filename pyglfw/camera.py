@@ -45,25 +45,29 @@ class Camera:
         )
 
     def key_pressed(self, key, shift):
-        debug('key_pressed: {}/{}'.format(key, shift))
         if not shift:
             if key == Qt.Key_A:
-                self.position -= self.right * Camera.SPEED
+                self.position -= self.right * self.SPEED
             elif key == Qt.Key_D:
-                self.position += self.right * Camera.SPEED
+                self.position += self.right * self.SPEED
             elif key == Qt.Key_S:
-                self.position -= self.front * Camera.SPEED
+                self.position -= self.front * self.SPEED
             elif key == Qt.Key_W:
-                self.position += self.front * Camera.SPEED
+                self.position += self.front * self.SPEED
         else:
             if key == Qt.Key_A:
-                self.yaw += Camera.SPEED_ROTATION
+                self.yaw += self.SPEED_ROTATION
             elif key == Qt.Key_D:
-                self.yaw -= Camera.SPEED_ROTATION
+                self.yaw -= self.SPEED_ROTATION
             elif key == Qt.Key_S:
-                self.pitch -= Camera.SPEED_ROTATION
+                self.pitch -= self.SPEED_ROTATION
             elif key == Qt.Key_W:
-                self.pitch += Camera.SPEED_ROTATION
+                self.pitch += self.SPEED_ROTATION
+        debug('Camera pos({}), yaw({}), pitch({})'.format(
+            self.position,
+            math.degrees(self.yaw),
+            math.degrees(self.pitch)
+        ))
 
     @property
     def front(self):
