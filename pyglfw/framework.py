@@ -71,6 +71,7 @@ class VertexObject:
     def __init__(self, vertices, alignment, indices=None):
         self._vbo = 0
         self._vao = 0
+        self._prev_vao = 0
         self._index_object = None
 
         total = 0
@@ -124,11 +125,12 @@ class VertexObject:
         debug('vo {} is deleted'.format(self))
 
     def __enter__(self):
+        self._prev_vao = glGetIntegerv(GL_VERTEX_ARRAY_BINDING);
         glBindVertexArray(self._vao)
         return self
 
     def __exit__(self, exc_type, exc_value, tb):
-        glBindVertexArray(0)
+        glBindVertexArray(self._prev_vao)
 
     def update(self, vertices):
         if vertices.size != self._size:
@@ -149,7 +151,7 @@ class VertexObject:
     @index_object.setter
     def index_object(self, value):
         self._index_object = value
-        with(self):
+        with self:
             glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, value.id)
 
     @property
@@ -167,6 +169,7 @@ class IndexObject:
 
     def __init__(self, indices):
         self._id = 0
+        self._prev_ebo = 0
         self.update(indices)
         debug('eo {} is created EBO({})'.format(self, self.id))
 
@@ -188,11 +191,12 @@ class IndexObject:
             )
 
     def __enter__(self):
+        self._prev_ebo = glGetIntegerv(GL_ELEMENT_ARRAY_BUFFER_BINDING)
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, self.id)
         return self
 
     def __exit__(self, exc_type, exc_value, tb):
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0)
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, self._prev_ebo)
 
     @property
     def count(self):

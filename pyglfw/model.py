@@ -5,6 +5,7 @@ import random
 
 from .framework import Camera
 from OpenGL.GL import *
+from pyglfw.framework import IndexObject
 from pyglfw.framework import VertexObject
 from .renderer import Renderer
 from .renderer import resource_path
@@ -29,15 +30,16 @@ def load_fromjson(jsonpath):
 
     vertices = _pick('vertices', desc, dtype=np.float32)
     edges = _pick('edges', desc, dtype=np.uint8)
+    faces = _pick('faces', desc, dtype=np.uint8)
     color = _pick('color', desc, dtype=np.float32)
 
-    return Model(vertices=vertices, edges=edges, color=color)
+    return Model(vertices=vertices, edges=edges, faces=faces, color=color)
 
 
 class Model:
 
     def __init__(self,
-                 vertices=None, edges=None, color=None):
+                 vertices=None, edges=None, faces=None, color=None):
         self._vertices = None
         self._vertices_pending = None
         self._color_pending = None
@@ -55,6 +57,16 @@ class Model:
 
         self.vertices = vertices
         self.edges = edges
+        self.faces = faces
+
+        self._indexobj_edges = None
+        self._indexobj_faces = None
+
+    def prepare(self):
+        if self.edges is not None:
+            self._indexobj_edges = IndexObject(self.edges)
+        if self.faces is not None:
+            self._indexobj_faces = IndexObject(self.faces)
 
     def draw(self, program):
         self._update_geometry()
@@ -66,7 +78,11 @@ class Model:
             glPointSize(8)
             glDrawArrays(GL_POINTS, 0, vo.vertex_count)
             if self.edges is not None:
-                glDrawElements(GL_LINES, vo.element_count, GL_UNSIGNED_BYTE, None)
+                with self._indexobj_edges as ebo:
+                    glDrawElements(GL_LINES, ebo.count, GL_UNSIGNED_BYTE, None)
+            if self.faces is not None:
+                with self._indexobj_faces as ebo:
+                    glDrawElements(GL_TRIANGLES, ebo.count, GL_UNSIGNED_BYTE, None)
 
     def _update_geometry(self):
         if not self._check_pending_data():
@@ -77,8 +93,7 @@ class Model:
         if self._vertex_object is None:
             self._vertex_object = VertexObject(
                 v,
-                self._alignment,
-                indices=self.edges
+                self._alignment
             )
         else:
             self._vertex_object.update(v)
@@ -164,6 +179,9 @@ class ModelRenderer(Renderer):
                     100.0
             )
             p.setMatrix4('projection', projmat)
+
+        if self.model is not None:
+            self.model.prepare()
 
     def render(self):
         if self.model is None:
