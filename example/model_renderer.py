@@ -30,23 +30,38 @@ def test_model_json(jsonpath):
     w.keyPressed.connect(renderer.camera.key_pressed)
     w.show()
 
-    # from PyQt5.QtCore import QTimer
+    sys.exit(app.exec_())
 
-    # def _change1():
-    #     model.color = np.array([1.0, 0.0, 0.0], dtype=np.float32)
-    #     w.update()
 
-    # def _change2():
-    #     model.color = np.array([1.0, 1.0, 0.0], dtype=np.float32)
-    #     w.update()
+def test_model_attr(jsonpath):
+    app = QApplication(sys.argv)
 
-    # def _change3():
-    #     model.color = np.array([0.0, 0.0, 1.0], dtype=np.float32)
-    #     w.update()
+    model = load_fromjson(jsonpath)
+    renderer = ModelRenderer(model=model)
+    renderer.camera.yaw = math.radians(90.0)
+    renderer.camera.position = np.array([0.0, 0.0, -1.0], dtype=np.float32)
 
-    # QTimer.singleShot(1000, lambda: _change1())
-    # QTimer.singleShot(2000, lambda: _change2())
-    # QTimer.singleShot(3000, lambda: _change3())
+    w = GLWidget()
+    w.renderer = renderer
+    w.show()
+
+    from PyQt5.QtCore import QTimer
+
+    def _change1():
+        model.color = np.array([1.0, 0.0, 0.0], dtype=np.float32)
+        w.update()
+
+    def _change2():
+        model.color = np.array([1.0, 1.0, 0.0], dtype=np.float32)
+        w.update()
+
+    def _change3():
+        model.color = np.array([0.0, 0.0, 1.0], dtype=np.float32)
+        w.update()
+
+    QTimer.singleShot(1000, lambda: _change1())
+    QTimer.singleShot(2000, lambda: _change2())
+    QTimer.singleShot(3000, lambda: _change3())
 
     sys.exit(app.exec_())
 
@@ -72,6 +87,7 @@ def main():
     verbose = args.verbose
     filepath = args.filepath
 
+    # test_model_attr(filepath)
     test_model_json(filepath)
 
 
