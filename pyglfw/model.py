@@ -72,7 +72,6 @@ class Model:
         self.attrs = attributes
 
         if color is None and attributes is None:
-            print('random color')
             color = (
                 random.random(),
                 random.random(),
@@ -237,6 +236,7 @@ class ModelRenderer(Renderer):
     def prepare(self):
         super().prepare()
         with self._program as p:
+            # This would better lie in Camera object
             projmat = pyrr.matrix44.create_perspective_projection(
                     45.0,
                     1.0/1.0,
