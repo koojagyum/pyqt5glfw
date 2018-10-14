@@ -135,7 +135,7 @@ class VertexObject:
 
     def update(self, vertices):
         if vertices.size != self._size:
-            return
+            return False
 
         glBindBuffer(GL_ARRAY_BUFFER, self._vbo)
         glBufferData(
@@ -144,6 +144,8 @@ class VertexObject:
             GL_STATIC_DRAW
         )
         glBindBuffer(GL_ARRAY_BUFFER, 0)
+
+        return True
 
     @property
     def index_object(self):

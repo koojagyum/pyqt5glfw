@@ -120,13 +120,14 @@ class Model:
 
         v = self._build_data()
 
-        if self._vertex_object is None:
-            self._vertex_object = VertexObject(
-                v,
-                self._alignment
-            )
-        else:
-            self._vertex_object.update(v)
+        if self._vertex_object is not None and \
+           self._vertex_object.update(v):
+            return
+
+        self._vertex_object = VertexObject(
+            v,
+            self._alignment
+        )
 
     def _check_pending_data(self):
         pending_check = self._vertices_pending is None and \
