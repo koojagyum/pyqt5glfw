@@ -3,8 +3,10 @@ import sys
 
 from OpenGL.GL import *
 
+from PyQt5.QtCore import pyqtSignal
 from PyQt5.QtCore import QUrl
 from PyQt5.QtCore import Qt
+from PyQt5.QtGui import QColor
 from PyQt5.QtGui import QGuiApplication
 from PyQt5.QtQml import QQmlApplicationEngine
 from PyQt5.QtQuick import QQuickView
@@ -20,6 +22,8 @@ def debug(msg):
 
 
 class QQuickGLView(QQuickView):
+
+    keyPressed = pyqtSignal(int, bool)
 
     def __init__(self, parent=None):
         super(QQuickView, self).__init__(parent)
@@ -45,6 +49,7 @@ class QQuickGLView(QQuickView):
         )
 
         self.setClearBeforeRendering(False)
+        self.setColor(QColor.fromRgbF(0.0, 0.0, 0.0))
 
     def initializeUnderlay(self):
         self._check_next_renderer()
@@ -74,6 +79,7 @@ class QQuickGLView(QQuickView):
         if self._renderer:
             if switched:
                 self._renderer.prepare()
+            glEnable(GL_CULL_FACE)
             self._renderer.render()
 
         self.resetOpenGLState()
@@ -91,6 +97,12 @@ class QQuickGLView(QQuickView):
             self._next_renderer = None
 
         return switched
+
+    def keyPressEvent(self, event):
+        super(QQuickGLView, self).keyPressEvent(event)
+        shift = event.modifiers() & Qt.ShiftModifier
+        self.keyPressed.emit(event.key(), shift)
+        self.update()
 
     @property
     def renderer(self):
