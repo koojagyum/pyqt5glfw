@@ -252,15 +252,15 @@ class ModelInstance:
             self.model.dispose()
 
     @property
-    def model_matrix:
-        scale_mat = pyrr.matrix44.create_from_translation(
+    def model_matrix(self):
+        scale_mat = pyrr.matrix44.create_from_scale(
             np.array(self.scale, dtype=np.float32)
         )
         trans_mat = pyrr.matrix44.create_from_translation(
             np.array(self.translation, dtype=np.float32)
         )
         rot_mat = pyrr.matrix44.create_from_eulers(
-            np.array(self.rotation, dtype=np.float32)
+            np.radians(np.array(self.rotation, dtype=np.float32))
         )
         return np.matmul(trans_mat, np.matmul(scale_mat, rot_mat))
 
@@ -320,6 +320,7 @@ class ModelRenderer(Renderer):
         super().prepare()
         with self._program as p:
             p.setMatrix4('projection', self.camera.proj_matrix)
+            p.setMatrix4('model', pyrr.matrix44.create_identity())
 
         for model in self.models:
             model.prepare()
