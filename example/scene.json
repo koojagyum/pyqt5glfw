@@ -1,0 +1,44 @@
+{
+    "name": "basic scene",
+    "resource": [
+        {
+            "name": "model",
+            "filepath": "./cubic.json"
+        },
+        {
+            "name": "model",
+            "filepath": "./triangle.json"
+        }
+    ],
+    "light": [
+        {
+        }
+    ],
+    "instance": [
+        {
+            "name": "cubic1",
+            "model": "cubic",
+            "renderer": "ModelRenderer",
+            "position": [0.0, 0.0, 0.0],
+            "rotation": [0.0, 0.0, 0.0],
+            "scale": [1.2, 1.2, 1.2]
+        },
+        {
+            "name": "cubic2",
+            "model": "cubic",
+            "renderer": "ModelRenderer",
+            "position": [0.0, 0.0, 2.0],
+            "rotation": [0.0, 0.0, 0.0],
+            "scale": [0.7, 0.7, 0.7]
+        }
+    ],
+    "camera": {
+        "position": [0.0, 0.0, 3.0],
+        "up": [0.0, 1.0, 0.0],
+        "rotation": [-90.0, 0.0, 0.0],
+        "fov": 45.0,
+        "aspect_ratio": -1.0,
+        "near_distance": 0.1,
+        "far_distance": 100.0
+    }
+}

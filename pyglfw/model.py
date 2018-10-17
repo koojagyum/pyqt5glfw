@@ -114,6 +114,10 @@ class Model:
                         None
                     )
 
+    def dispose(self):
+        self._indexobj_edges = None
+        self._indexobj_faces = None
+
     def _update_geometry(self):
         if not self._check_pending_data():
             return
@@ -220,6 +224,84 @@ class Model:
         return a
 
 
+class ModelInstance:
+
+    def __init__(
+            self, name='',
+            model=None,
+            translation=[0.0, 0.0, 0.0],
+            rotation=[0.0, 0.0, 0.0],
+            scale=[1.0, 1.0, 1.0]):
+        self.name = name
+        self.model = model
+        self.translation = translation
+        self.rotation = rotation
+        self.scale = scale
+
+    def prepare(self):
+        if self.model:
+            self.model.prepare()
+
+    def draw(self, program):
+        if self.model:
+            program.setMatrix4('model', self.model_matrix)
+            self.model.draw(program)
+
+    def dispose(self):
+        if self.model:
+            self.model.dispose()
+
+    @property
+    def model_matrix:
+        scale_mat = pyrr.matrix44.create_from_translation(
+            np.array(self.scale, dtype=np.float32)
+        )
+        trans_mat = pyrr.matrix44.create_from_translation(
+            np.array(self.translation, dtype=np.float32)
+        )
+        rot_mat = pyrr.matrix44.create_from_eulers(
+            np.array(self.rotation, dtype=np.float32)
+        )
+        return np.matmul(trans_mat, np.matmul(scale_mat, rot_mat))
+
+
+class InstanceRenderer(Renderer):
+
+    default_vs_path = resource_path('./shader/model_color.vs')
+    default_fs_path = resource_path('./shader/model_color.fs')
+
+    def __init__(self, name=''):
+        super().__init__(
+            vs_path=self.default_vs_path,
+            fs_path=self.default_fs_path,
+            name=name
+        )
+        self.instances = []
+        self.camera = Camera()
+
+    def prepare(self):
+        super().prepare()
+        with self._program as p:
+            p.setMatrix4('projection', self.camera.proj_matrix)
+
+        for i in self.instances:
+            i.prepare()
+
+    def render(self):
+        if len(self.instances) == 0:
+            return
+
+        with self._program as p:
+            p.setMatrix4('view', self.camera.view_matrix)
+            for i in self.instances:
+                i.draw(p)
+
+    def dispose(self):
+        super().dispose()
+        for i in self.instances:
+            i.dispose()
+
+
 class ModelRenderer(Renderer):
 
     default_vs_path = resource_path('./shader/model_color.vs')
@@ -253,3 +335,5 @@ class ModelRenderer(Renderer):
 
     def dispose(self):
         super().dispose()
+        for model in self.models:
+            model.dispose()
