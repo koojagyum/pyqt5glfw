@@ -1,6 +1,6 @@
 {
     "name": "basic scene",
-    "resource": [
+    "resources": [
         {
             "name": "model",
             "filepath": "./cubic.json"
@@ -10,11 +10,11 @@
             "filepath": "./triangle.json"
         }
     ],
-    "light": [
+    "lights": [
         {
         }
     ],
-    "instance": [
+    "instances": [
         {
             "name": "cubic1",
             "model": "cubic",

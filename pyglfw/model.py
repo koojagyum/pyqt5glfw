@@ -19,10 +19,7 @@ def debug(msg):
         print(msg)
 
 
-def load_fromjson(jsonpath):
-    with open(jsonpath) as f:
-        desc = json.load(f)
-
+def load_model(desc):
     def _pick(key, dic, dtype=np.float32):
         if key not in dic:
             return None
@@ -40,7 +37,12 @@ def load_fromjson(jsonpath):
         for key, value in attrs.items():
             attrs[key] = np.array(value, dtype=np.float32)
 
+    name = None
+    if 'name' in desc:
+        name = desc['name']
+
     return Model(
+        name=name,
         vertices=vertices,
         edges=edges,
         faces=faces,
@@ -49,12 +51,22 @@ def load_fromjson(jsonpath):
     )
 
 
+def load_fromjson(jsonpath):
+    with open(jsonpath) as f:
+        desc = json.load(f)
+        return load_model(desc)
+
+    return None
+
+
 class Model:
 
     def __init__(self,
+                 name='',
                  vertices=None,
                  edges=None, faces=None,
                  color=None, attributes=None):
+        self.name = name
         self._vertices = None
         self._color = None
         self._attrs = None
