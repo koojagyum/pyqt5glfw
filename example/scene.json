@@ -3,7 +3,7 @@
     "resources": [
         {
             "name": "model",
-            "filepath": "./cubic_attr.json"
+            "filepath": "./cubic.json"
         },
         {
             "name": "model",
@@ -37,6 +37,14 @@
             "renderer": "InstanceRenderer",
             "translation": [0.0, 0.0, 1.0],
             "rotation": [0.0, 0.0, 0.0],
+            "scale": [2.2, 2.2, 1.2]
+        },
+        {
+            "name": "triangle2",
+            "model": "triangle",
+            "renderer": "InstanceRenderer",
+            "translation": [1.0, 1.0, 0.0],
+            "rotation": [90.0, 180.0, 180.0],
             "scale": [2.2, 2.2, 1.2]
         }
     ],

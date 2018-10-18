@@ -274,7 +274,7 @@ class ModelInstance:
         rot_mat = pyrr.matrix44.create_from_eulers(
             np.radians(np.array(self.rotation, dtype=np.float32))
         )
-        return np.matmul(trans_mat, np.matmul(scale_mat, rot_mat))
+        return np.matmul(rot_mat, np.matmul(scale_mat, trans_mat))
 
 
 class InstanceRenderer(Renderer):
