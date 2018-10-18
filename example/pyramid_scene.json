@@ -16,6 +16,20 @@
     ],
     "lights": [
         {
+            "type": "directional",
+            "direction": [1, -1, -1],
+            "ambient": [0.0, 0.0, 0.0],
+            "diffuse": [1.0, 1.0, 1.0],
+            "specular": [0.0, 0.0, 0.0]
+        },
+        {
+            "type": "point",
+            "constant": 0.0,
+            "linear": 0.0,
+            "quadratic": 0.0,
+            "ambient": [0.0, 0.0, 0.0],
+            "diffuse": [1.0, 1.0, 1.0],
+            "specular": [0.0, 0.0, 0.0]
         }
     ],
     "instances": [
