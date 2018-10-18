@@ -282,19 +282,25 @@ class InstanceRenderer(Renderer):
     default_vs_path = resource_path('./shader/model_color.vs')
     default_fs_path = resource_path('./shader/model_color.fs')
 
-    def __init__(self, name=''):
+    def __init__(self, name='', camera=None):
         super().__init__(
             vs_path=self.default_vs_path,
             fs_path=self.default_fs_path,
             name=name
         )
         self.instances = []
-        self.camera = Camera()
+        self.camera = camera
 
     def prepare(self):
         super().prepare()
         with self._program as p:
-            p.setMatrix4('projection', self.camera.proj_matrix)
+            if self.camera is None:
+                p.setMatrix4(
+                    'projection',
+                    pyrr.matrix44.create_identity()
+                )
+            else:
+                p.setMatrix4('projection', self.camera.proj_matrix)
 
         for i in self.instances:
             i.prepare()
@@ -304,7 +310,10 @@ class InstanceRenderer(Renderer):
             return
 
         with self._program as p:
-            p.setMatrix4('view', self.camera.view_matrix)
+            if self.camera is None:
+                p.setMatrix4('view', pyrr.matrix44.create_identity())
+            else:
+                p.setMatrix4('view', self.camera.view_matrix)
             for i in self.instances:
                 i.draw(p)
 

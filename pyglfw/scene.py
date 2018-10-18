@@ -1,13 +1,26 @@
 import json
+import math
 import numpy as np
 import os
+import sys
 
 from .camera import Camera
 from .model import load_model
 from .model import InstanceRenderer
 from .model import ModelInstance
-from OpenGL.GL import *
 from .renderer import *
+
+from OpenGL.GL import *
+from PyQt5.QtWidgets import QApplication
+from pyqt5glfw.glwidget import GLWidget
+
+
+verbose = False
+
+
+def debug(msg):
+    if verbose:
+        print(msg)
 
 
 def load_resources(resources_dic, basepath='.'):
@@ -17,6 +30,7 @@ def load_resources(resources_dic, basepath='.'):
         return dic[key]
 
     resource_list = {}
+    model_list = {}
 
     for i in resources_dic:
         name = _pick(i, 'name')
@@ -28,12 +42,11 @@ def load_resources(resources_dic, basepath='.'):
         with open(filepath) as f:
             desc = json.load(f)
 
-        model_list = {}
         if name == 'model':
             model = load_model(desc)
             model_list[model.name] = model
 
-        resource_list['model'] = model_list
+    resource_list['model'] = model_list
 
     return resource_list
 
@@ -72,7 +85,32 @@ def load_instance(instances_dic, model_list):
 
 
 def load_camera(camera_dic):
-    return None
+    def _pick(dic, key):
+        if key not in dic:
+            return None
+        return dic[key]
+
+    position = _pick(camera_dic, 'position')
+    up = _pick(camera_dic, 'up')
+    rotation = _pick(camera_dic, 'rotation')
+    fov = _pick(camera_dic, 'fov')
+    aspect_ratio = _pick(camera_dic, 'aspect_ratio')
+    near_distance = _pick(camera_dic, 'near_distance')
+    far_distance = _pick(camera_dic, 'far_distance')
+
+    camera = Camera()
+    camera.position = position
+    camera.world_up = up
+    camera.yaw = math.radians(rotation[0])
+    camera.pitch = math.radians(rotation[1])
+    camera.set_projection(
+        fov=fov,
+        aspect_ratio=aspect_ratio,
+        near_distance=near_distance,
+        far_distance=far_distance
+    )
+
+    return camera
 
 
 def load_fromjson(jsonpath):
@@ -85,37 +123,85 @@ def load_fromjson(jsonpath):
         return dic[key]
 
     name = _pick(desc, 'name')
-    resources = _pick(desc, 'resources')
-    lights = _pick(desc, 'lights')
-    instances = _pick(desc, 'instances')
-    camera = _pick(desc, 'camera')
+    resources_desc = _pick(desc, 'resources')
+    lights_desc = _pick(desc, 'lights')
+    instances_desc = _pick(desc, 'instances')
+    camera_desc = _pick(desc, 'camera')
 
     basepath = os.path.dirname(jsonpath)
 
-    # print(name)
-    # print(resource)
-    # print(light)
-    # print(instance)
-    # print(camera)
+    debug(f'name: {name}')
 
-    resource_list = load_resources(resources, basepath)
-    print('resources:')
-    print(resource_list)
-    print('')
+    resource_list = load_resources(
+        resources_desc,
+        basepath
+    )
+    debug(f'resources:\n{resource_list}\n')
 
-    instance_list = load_instance(instances, resource_list['model'])
-    print('instances:')
-    print(instance_list)
-    print('')
+    instance_list = load_instance(
+        instances_desc,
+        resource_list['model']
+    )
+    debug(f'instances:\n{instance_list}\n')
+
+    camera = load_camera(camera_desc)
+    debug(f'camera: {camera}\n')
+
+    renderer = InstanceRenderer()
+    for i in instance_list.values():
+        renderer.instances.append(i)
+
+    scene = Scene(
+        name=name,
+        renderer=renderer,
+        camera=camera,
+        instances=instance_list
+    )
+    debug(f'scene: {scene}\n')
+
+    return scene
+
+
+def test_json(jsonpath):
+    scene = load_fromjson(jsonpath)
+
+    app = QApplication(sys.argv)
+    w = GLWidget()
+    w.renderer = scene
+    w.keyPressed.connect(scene.camera.key_pressed)
+    w.show()
+
+    sys.exit(app.exec_())
 
 
 class Scene:
 
     def __init__(
-            self, name='scene',
-            models=[],
-            light=None):
-        pass
+            self,
+            name='scene',
+            renderer=None,
+            camera=None,
+            instances={},
+            lights=[]):
+        self.name = name
+        self.renderer = renderer
+        self.camera = camera
+        self.instances = instances
+        self.lights = lights
+
+        self.renderer.camera = camera
+
+    def prepare(self):
+        if self.renderer is not None:
+            self.renderer.prepare()
+
+    def render(self):
+        if self.renderer is not None:
+            self.renderer.render()
+
+    def dispose(self):
+        if self.renderer is not None:
+            self.renderer.dispose()
 
 
 def main():
@@ -128,7 +214,7 @@ def main():
     parser.add_argument(
         '--verbose', '-v',
         action='store_true',
-        default=True,
+        default=False,
         help='Print debug string'
     )
     parser.add_argument(
@@ -142,7 +228,7 @@ def main():
     verbose = args.verbose
     filepath = args.filepath
 
-    load_fromjson(filepath)
+    test_json(filepath)
 
 
 if __name__ == '__main__':

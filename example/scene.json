@@ -3,7 +3,7 @@
     "resources": [
         {
             "name": "model",
-            "filepath": "./cubic.json"
+            "filepath": "./cubic_attr.json"
         },
         {
             "name": "model",
@@ -19,7 +19,7 @@
             "name": "cubic1",
             "model": "cubic",
             "renderer": "InstanceRenderer",
-            "translation": [0.0, 0.0, 0.0],
+            "translation": [3.0, 0.0, 1.0],
             "rotation": [0.0, 0.0, 0.0],
             "scale": [1.2, 1.2, 1.2]
         },
@@ -27,17 +27,25 @@
             "name": "cubic2",
             "model": "cubic",
             "renderer": "InstanceRenderer",
-            "translation": [0.0, 0.0, 2.0],
+            "translation": [0.0, 0.0, 1.0],
             "rotation": [0.0, 0.0, 0.0],
             "scale": [0.7, 0.7, 0.7]
+        },
+        {
+            "name": "triangle1",
+            "model": "triangle",
+            "renderer": "InstanceRenderer",
+            "translation": [0.0, 0.0, 1.0],
+            "rotation": [0.0, 0.0, 0.0],
+            "scale": [2.2, 2.2, 1.2]
         }
     ],
     "camera": {
-        "position": [0.0, 0.0, 3.0],
+        "position": [3.0, 0.0, -10.0],
         "up": [0.0, 1.0, 0.0],
-        "rotation": [-90.0, 0.0, 0.0],
+        "rotation": [90.0, 0.0, 0.0],
         "fov": 45.0,
-        "aspect_ratio": -1.0,
+        "aspect_ratio": 1.0,
         "near_distance": 0.1,
         "far_distance": 100.0
     }
