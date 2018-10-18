@@ -2,11 +2,11 @@
     "name": "basic scene",
     "resources": [
         {
-            "name": "model",
+            "type": "model",
             "filepath": "./cubic.json"
         },
         {
-            "name": "model",
+            "type": "model",
             "filepath": "./triangle.json"
         }
     ],

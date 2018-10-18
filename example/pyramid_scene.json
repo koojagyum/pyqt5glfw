@@ -2,15 +2,15 @@
     "name": "pyramid scene",
     "resources": [
         {
-            "name": "model",
+            "type": "model",
             "filepath": "./pyramid.json"
         },
         {
-            "name": "model",
+            "type": "model",
             "filepath": "./floor.json"
         },
         {
-            "name": "model",
+            "type": "model",
             "filepath": "./cubebox.json"
         }
     ],

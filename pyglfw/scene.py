@@ -33,7 +33,7 @@ def load_resources(resources_dic, basepath='.'):
     model_list = {}
 
     for i in resources_dic:
-        name = _pick(i, 'name')
+        resource_type = _pick(i, 'type')
         filepath = _pick(i, 'filepath')
         # todo: check ~ included path
         if os.path.isabs(filepath) is False:
@@ -42,7 +42,7 @@ def load_resources(resources_dic, basepath='.'):
         with open(filepath) as f:
             desc = json.load(f)
 
-        if name == 'model':
+        if resource_type == 'model':
             model = load_model(desc)
             model_list[model.name] = model
 
