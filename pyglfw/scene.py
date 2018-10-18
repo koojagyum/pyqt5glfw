@@ -97,6 +97,7 @@ def load_camera(camera_dic):
     aspect_ratio = _pick(camera_dic, 'aspect_ratio')
     near_distance = _pick(camera_dic, 'near_distance')
     far_distance = _pick(camera_dic, 'far_distance')
+    move_speed = _pick(camera_dic, 'move_speed')
 
     camera = Camera()
     camera.position = position
@@ -109,6 +110,8 @@ def load_camera(camera_dic):
         near_distance=near_distance,
         far_distance=far_distance
     )
+    if move_speed is not None:
+        camera.SPEED = move_speed
 
     return camera
 
