@@ -356,5 +356,5 @@ class ModelRenderer(Renderer):
 
     def dispose(self):
         super().dispose()
-        for model in self.models:
-            model.dispose()
+        if self.model is not None:
+            self.model.dispose()
