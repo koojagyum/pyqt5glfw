@@ -4,11 +4,13 @@ import pyrr
 import random
 
 from .camera import Camera
+from .light import DirectionalLight
+from .renderer import Renderer
+from .renderer import resource_path
+
 from OpenGL.GL import *
 from pyglfw.framework import IndexObject
 from pyglfw.framework import VertexObject
-from .renderer import Renderer
-from .renderer import resource_path
 
 
 verbose = True
@@ -61,6 +63,12 @@ def load_fromjson(jsonpath):
 
 class Model:
 
+    ATTR_ORDER = [
+        # 'position',
+        'color',
+        'normal',
+    ]
+
     def __init__(self,
                  name='',
                  vertices=None,
@@ -69,7 +77,7 @@ class Model:
         self.name = name
         self._vertices = None
         self._color = None
-        self._attrs = None
+        self._attrs = {}
         self._vertices_pending = None
         self._color_pending = None
         self._attrs_pending = None
@@ -83,7 +91,8 @@ class Model:
         self.vertices = vertices
         self.attrs = attributes
 
-        if color is None and attributes is None:
+        if color is None and \
+           'color' not in attributes:
             color = (
                 random.random(),
                 random.random(),
@@ -172,13 +181,23 @@ class Model:
         return True
 
     def _build_data(self):
+
+        def _concat_withname(v, name):
+            if name in self.attrs:
+                return np.column_stack((v, self.attrs[name]))
+            return v
+
         if self.color is not None:
-            return self._concat_withcolors(self.vertices)
-        else:
-            return self._concat_withattrs(
-                self.vertices,
-                self.attrs.values()
-            )
+            self.attrs['color'] = self._get_colors(self.vertices.shape[0])
+
+        v = self.vertices
+        if self.attrs is not None:
+            for attr_name in self.ATTR_ORDER:
+                # if attr_name == 'position':
+                #     continue
+                v = _concat_withname(v, attr_name)
+
+        return v
 
     def _get_colors(self, num):
         color = np.array((self.color), dtype='float32')
@@ -211,8 +230,10 @@ class Model:
     @color.setter
     def color(self, value):
         self._color_pending = value
-        if value is not None:
-            self._attrs_pending = None
+        if value is not None and \
+           self._attrs_pending is not None and \
+           'color' in self._attrs_pending:
+            self._attrs_pending.pop('color', None)
 
     @property
     def attrs(self):
@@ -221,17 +242,18 @@ class Model:
     @attrs.setter
     def attrs(self, value):
         self._attrs_pending = value
-        if value is not None:
+        if value is not None and \
+           self._attrs_pending is not None and \
+           'color' in self._attrs_pending:
             self._color_pending = None
 
     @property
     def _alignment(self):
-        if self.color is not None:
-            return [self.vertices.shape[1], 3]
-
         a = [self.vertices.shape[1]]
-        for v in self.attrs.values():
-            a.append(v.shape[1])
+
+        for attr_name in self.ATTR_ORDER:
+            if attr_name in self.attrs:
+                a.append(self.attrs[attr_name].shape[1])
 
         return a
 
@@ -279,10 +301,10 @@ class ModelInstance:
 
 class InstanceRenderer(Renderer):
 
-    default_vs_path = resource_path('./shader/model_color.vs')
-    default_fs_path = resource_path('./shader/model_color.fs')
+    default_vs_path = resource_path('./shader/model_color_light.vs')
+    default_fs_path = resource_path('./shader/model_color_light.fs')
 
-    def __init__(self, name='', camera=None):
+    def __init__(self, name='', camera=None, light=None):
         super().__init__(
             vs_path=self.default_vs_path,
             fs_path=self.default_fs_path,
@@ -290,6 +312,10 @@ class InstanceRenderer(Renderer):
         )
         self.instances = []
         self.camera = camera
+        self.light = DirectionalLight(
+            name='dirLight',
+            direction=np.array([-0.2, -0.1, -0.3], dtype=np.float32)
+        )
 
     def prepare(self):
         super().prepare()
@@ -314,6 +340,11 @@ class InstanceRenderer(Renderer):
                 p.setMatrix4('view', pyrr.matrix44.create_identity())
             else:
                 p.setMatrix4('view', self.camera.view_matrix)
+                p.setVec3f('viewPos', self.camera.position)
+
+            if self.light is not None:
+                self.light.update(p)
+
             for i in self.instances:
                 i.draw(p)
 
@@ -325,8 +356,8 @@ class InstanceRenderer(Renderer):
 
 class ModelRenderer(Renderer):
 
-    default_vs_path = resource_path('./shader/model_color.vs')
-    default_fs_path = resource_path('./shader/model_color.fs')
+    default_vs_path = resource_path('./shader/model_color_light.vs')
+    default_fs_path = resource_path('./shader/model_color_light.fs')
 
     def __init__(self, name='', model=None, camera=None):
         super().__init__(
@@ -336,6 +367,10 @@ class ModelRenderer(Renderer):
         )
         self.model = model
         self.camera = camera
+        self.light = DirectionalLight(
+            name='dirLight',
+            direction=np.array([-0.2, -0.1, -0.3], dtype=np.float32)
+        )
 
     def prepare(self):
         super().prepare()
@@ -361,6 +396,11 @@ class ModelRenderer(Renderer):
                 p.setMatrix4('view', pyrr.matrix44.create_identity())
             else:
                 p.setMatrix4('view', self.camera.view_matrix)
+                p.setVec3f('viewPos', self.camera.position)
+
+            if self.light is not None:
+                self.light.update(p)
+
             self.model.draw(p)
 
     def dispose(self):
