@@ -22,8 +22,7 @@ def test_model_json(jsonpath):
 
     app = QApplication(sys.argv)
 
-    renderer = ModelRenderer()
-    renderer.models.append(model)
+    renderer = ModelRenderer(model=model)
     renderer.camera.yaw = math.radians(90.0)
     renderer.camera.position = np.array([0.0, 0.0, -1.0], dtype=np.float32)
 
@@ -41,8 +40,7 @@ def test_model_textbook(jsonpath):
 
     app = QApplication(sys.argv)
 
-    renderer = ModelRenderer()
-    renderer.models.append(model)
+    renderer = ModelRenderer(model=model)
     renderer.camera.yaw = math.radians(-90.0)
     renderer.camera.position = np.array(
         [57.0, 41.0, 247.0], dtype=np.float32
