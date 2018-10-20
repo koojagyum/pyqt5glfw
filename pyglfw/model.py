@@ -328,19 +328,25 @@ class ModelRenderer(Renderer):
     default_vs_path = resource_path('./shader/model_color.vs')
     default_fs_path = resource_path('./shader/model_color.fs')
 
-    def __init__(self, name='', model=None):
+    def __init__(self, name='', model=None, camera=None):
         super().__init__(
             vs_path=self.default_vs_path,
             fs_path=self.default_fs_path,
             name=name
         )
         self.model = model
-        self.camera = Camera()
+        self.camera = camera
 
     def prepare(self):
         super().prepare()
         with self._program as p:
-            p.setMatrix4('projection', self.camera.proj_matrix)
+            if self.camera is None:
+                p.setMatrix4(
+                    'projection',
+                    pyrr.matrix44.create_identity()
+                )
+            else:
+                p.setMatrix4('projection', self.camera.proj_matrix)
             p.setMatrix4('model', pyrr.matrix44.create_identity())
 
         if self.model is not None:
@@ -351,7 +357,10 @@ class ModelRenderer(Renderer):
             return
 
         with self._program as p:
-            p.setMatrix4('view', self.camera.view_matrix)
+            if self.camera is None:
+                p.setMatrix4('view', pyrr.matrix44.create_identity())
+            else:
+                p.setMatrix4('view', self.camera.view_matrix)
             self.model.draw(p)
 
     def dispose(self):
