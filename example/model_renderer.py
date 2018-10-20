@@ -24,7 +24,7 @@ def test_model_json(jsonpath):
     renderer = ModelRenderer()
     renderer.models.append(model)
     renderer.camera.yaw = math.radians(90.0)
-    renderer.camera.position = np.array([0.0, 0.0, -1.0], dtype=np.float32)
+    renderer.camera.position = np.array([0.0, 0.0, -5.0], dtype=np.float32)
 
     w = GLWidget()
     w.renderer = renderer
@@ -118,8 +118,8 @@ def main():
     filepath = args.filepath
 
     # test_model_attr(filepath)
-    # test_model_json(filepath)
-    test_model_textbook(filepath)
+    test_model_json(filepath)
+    # test_model_textbook(filepath)
 
 
 if __name__ == '__main__':
