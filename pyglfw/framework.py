@@ -49,6 +49,10 @@ class Program:
     def setFloat(self, name, value):
         glUniform1f(glGetUniformLocation(self._id, name), value)
 
+    def setVec3f(self, name, value):
+        count = int(value.shape[0] / 3)
+        glUniform3fv(glGetUniformLocation(self._id, name), count, value)
+
     def setVec4f(self, name, value):
         count = int(value.shape[0] / 4)
         glUniform4fv(glGetUniformLocation(self._id, name), count, value)
