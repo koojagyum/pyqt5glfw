@@ -100,8 +100,8 @@ def load_camera(camera_dic):
     move_speed = _pick(camera_dic, 'move_speed')
 
     camera = Camera()
-    camera.position = position
-    camera.world_up = up
+    camera.position = np.array(position, dtype=np.float32)
+    camera.world_up = np.array(up, dtype=np.float32)
     camera.yaw = math.radians(rotation[0])
     camera.pitch = math.radians(rotation[1])
     camera.set_projection(
