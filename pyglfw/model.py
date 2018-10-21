@@ -104,9 +104,11 @@ class ColorModel:
         self._faces = faces
 
     def prepare(self):
-        if self._edges is not None:
+        if self._edges is not None and \
+           self._indexobj_edges is None:
             self._indexobj_edges = IndexObject(self._edges)
-        if self._faces is not None:
+        if self._faces is not None and \
+           self._indexobj_faces is None:
             self._indexobj_faces = IndexObject(self._faces)
 
     def draw(self, program):
