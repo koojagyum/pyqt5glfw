@@ -5,10 +5,9 @@ import os
 import sys
 
 from .camera import Camera
-from .instance import InstanceRenderer
 from .instance import ModelInstance
 from .model import load_model
-from .renderer import *
+from .rendererman import RendererManager
 
 from OpenGL.GL import *
 from PyQt5.QtWidgets import QApplication
@@ -65,9 +64,7 @@ def load_instance(instances_dic, model_list):
         model_name = _pick(i, 'model')
         if model_name in model_list:
             model = model_list[model_name]
-        # renderer_name = _pick(i, 'renderer')
-        # renderer = globals()[renderer_name]
-        # print(renderer)
+        renderer_name = _pick(i, 'renderer')
         translation = _pick(i, 'translation')
         rotation = _pick(i, 'rotation')
         scale = _pick(i, 'scale')
@@ -75,6 +72,7 @@ def load_instance(instances_dic, model_list):
         instance = ModelInstance(
             name=name,
             model=model,
+            renderer_spec=renderer_name,
             translation=translation,
             rotation=rotation,
             scale=scale
@@ -150,13 +148,10 @@ def load_fromjson(jsonpath):
     camera = load_camera(camera_desc)
     debug(f'camera: {camera}\n')
 
-    renderer = InstanceRenderer()
-    for i in instance_list.values():
-        renderer.instances.append(i)
+    debug(f'lights:\n{lights_desc}\n')
 
     scene = Scene(
         name=name,
-        renderer=renderer,
         camera=camera,
         instances=instance_list
     )
@@ -182,32 +177,37 @@ class Scene:
     def __init__(
             self,
             name='scene',
-            renderer=None,
             camera=None,
             instances={},
             lights=[]):
+        self._renderer_man = RendererManager()
+
         self.name = name
-        self.renderer = renderer
         self.camera = camera
         self.instances = instances
         self.lights = lights
 
-        self.renderer.camera = camera
+        for i in self.instances.values():
+            renderer = self._renderer_man.get_renderer(i.renderer_spec)
+            renderer.instances.append(i)
+            renderer.camera = self.camera
 
     def prepare(self):
-        if self.renderer is not None:
-            self.renderer.prepare()
+        for r in self._renderer_man.renderers:
+            r.prepare()
 
     def reshape(self, w, h):
         glViewport(0, 0, w, h)
+        for r in self._renderer_man.renderers:
+            r.reshape(w, h)
 
     def render(self):
-        if self.renderer is not None:
-            self.renderer.render()
+        for r in self._renderer_man.renderers:
+            r.render()
 
     def dispose(self):
-        if self.renderer is not None:
-            self.renderer.dispose()
+        for r in self._renderer_man.renderers:
+            r.dispose()
 
 
 def main():
