@@ -5,9 +5,9 @@ import os
 import sys
 
 from .camera import Camera
+from .instance import InstanceRenderer
+from .instance import ModelInstance
 from .model import load_model
-from .model import InstanceRenderer
-from .model import ModelInstance
 from .renderer import *
 
 from OpenGL.GL import *
