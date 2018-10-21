@@ -6,6 +6,7 @@ import sys
 
 from .camera import Camera
 from .instance import ModelInstance
+from .light import load_light
 from .model import load_model
 from .rendererman import RendererManager
 
@@ -114,6 +115,26 @@ def load_camera(camera_dic):
     return camera
 
 
+def load_lights(lights_desc):
+    def _pick(dic, key):
+        if key not in dic:
+            return None
+        return dic[key]
+
+    def _pick_nparray(dic, key, dtype=np.float32):
+        if key not in dic:
+            return None
+        return np.array(dic[key], dtype=dtype)
+
+    light_list = []
+    for desc in lights_desc:
+        light = load_light(desc)
+        if light is not None:
+            light_list.append(light)
+
+    return light_list
+
+
 def load_fromjson(jsonpath):
     with open(jsonpath) as f:
         desc = json.load(f)
@@ -149,11 +170,13 @@ def load_fromjson(jsonpath):
     debug(f'camera: {camera}\n')
 
     debug(f'lights:\n{lights_desc}\n')
+    light_list = load_lights(lights_desc)
 
     scene = Scene(
         name=name,
         camera=camera,
-        instances=instance_list
+        instances=instance_list,
+        lights=light_list
     )
     debug(f'scene: {scene}\n')
 
@@ -191,6 +214,10 @@ class Scene:
             renderer = self._renderer_man.get_renderer(i.renderer_spec)
             renderer.instances.append(i)
             renderer.camera = self.camera
+            # Temporary!
+            if len(lights) > 0:
+                print(f'lights[0] name: {lights[0].name}')
+                renderer.light = lights[0]
 
     def prepare(self):
         for r in self._renderer_man.renderers:

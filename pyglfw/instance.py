@@ -117,10 +117,7 @@ class InstanceRenderer(MonoInstanceRenderer):
             name=name,
             camera=camera
         )
-        self.light = DirectionalLight(
-            name='dirLight',
-            direction=np.array([-0.2, -0.1, -0.3], dtype=np.float32)
-        )
+        self.light = light
 
     def render(self):
         if len(self.instances) == 0:
