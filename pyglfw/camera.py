@@ -5,7 +5,7 @@ import pyrr
 from PyQt5.QtCore import Qt
 
 
-verbose = False
+verbose = True
 
 
 def debug(msg):
@@ -63,11 +63,13 @@ class Camera:
                 self.pitch -= self.SPEED_ROTATION
             elif key == Qt.Key_W:
                 self.pitch += self.SPEED_ROTATION
-        debug('Camera pos({}), yaw({}), pitch({})'.format(
-            self.position,
-            math.degrees(self.yaw),
-            math.degrees(self.pitch)
-        ))
+
+        with np.printoptions(precision=2, suppress=True):
+            debug('Camera pos({}), yaw({:.2f}), pitch({:.2f})'.format(
+                self.position,
+                math.degrees(self.yaw),
+                math.degrees(self.pitch)
+            ))
 
     @property
     def front(self):
