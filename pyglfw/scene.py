@@ -214,10 +214,7 @@ class Scene:
             renderer = self._renderer_man.get_renderer(i.renderer_spec)
             renderer.instances.append(i)
             renderer.camera = self.camera
-            # Temporary!
-            if len(lights) > 0:
-                print(f'lights[0] name: {lights[0].name}')
-                renderer.light = lights[0]
+            renderer.lights = lights
 
     def prepare(self):
         for r in self._renderer_man.renderers:

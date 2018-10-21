@@ -263,7 +263,7 @@ class ModelRenderer(Renderer):
     default_vs_path = resource_path('./shader/model_color_light.vs')
     default_fs_path = resource_path('./shader/model_color_light.fs')
 
-    def __init__(self, name='', model=None, camera=None):
+    def __init__(self, name='', model=None, camera=None, lights=[]):
         super().__init__(
             vs_path=self.default_vs_path,
             fs_path=self.default_fs_path,
@@ -271,10 +271,7 @@ class ModelRenderer(Renderer):
         )
         self.model = model
         self.camera = camera
-        self.light = DirectionalLight(
-            name='dirLight',
-            direction=np.array([-0.2, -0.1, -0.3], dtype=np.float32)
-        )
+        self.lights = lights
 
     def prepare(self):
         super().prepare()
@@ -302,8 +299,8 @@ class ModelRenderer(Renderer):
                 p.setMatrix4('view', self.camera.view_matrix)
                 p.setVec3f('viewPos', self.camera.position)
 
-            if self.light is not None:
-                self.light.update(p)
+            for light in self.lights:
+                light.update(p)
 
             self.model.draw(p)
 

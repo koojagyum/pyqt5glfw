@@ -112,19 +112,19 @@ class InstanceRenderer(MonoInstanceRenderer):
     default_vs_path = resource_path('./shader/model_color_light.vs')
     default_fs_path = resource_path('./shader/model_color_light.fs')
 
-    def __init__(self, name='', camera=None, light=None):
+    def __init__(self, name='', camera=None, lights=[]):
         super().__init__(
             name=name,
             camera=camera
         )
-        self.light = light
+        self.lights = lights
 
     def render(self):
         if len(self.instances) == 0:
             return
 
         with self._program as p:
-            if self.light is not None:
-                self.light.update(p)
+            for light in self.lights:
+                light.update(p)
 
         super().render()
