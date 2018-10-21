@@ -225,9 +225,23 @@ class IndexObject:
 
 class Texture:
 
-    def __init__(self, **kwargs):
+    def __init__(
+            self,
+            image=None,
+            width=0, height=0,
+            target=GL_TEXTURE_2D,
+            unit=GL_TEXTURE0,
+            format=GL_RGB):
+        self._target = target
+        self._unit = unit
+        self._format = format
         self._id = glGenTextures(1)
-        self.update(**kwargs)
+
+        self.update(
+            image=image,
+            width=width,
+            height=height
+        )
 
     def __del__(self):
         glDeleteTextures(np.array([self.id], dtype='int32'))
@@ -241,11 +255,14 @@ class Texture:
         glActiveTexture(self._unit)
         glBindTexture(self._target, 0)
 
+    def bind(self):
+        glBindTexture(self._target, self.id)
+
     # image is numpy uint8 array
     def update(self, **kwargs):
-        self._target = kwargs.pop('target', GL_TEXTURE_2D)
-        self._unit = kwargs.pop('unit', GL_TEXTURE0)
-        self._format = kwargs.pop('format', GL_RGB)
+        self._target = kwargs.pop('target', self._target)
+        self._unit = kwargs.pop('unit', self._unit)
+        self._format = kwargs.pop('format', self._format)
         self.unit_number = self._unit - GL_TEXTURE0
 
         image = kwargs.pop('image', None)
@@ -328,7 +345,7 @@ class Framebuffer:
     def _setup_texture(self):
         tex_desc = {
             'target': self._textarget,
-            'uint': GL_TEXTURE0,
+            'unit': GL_TEXTURE0,
             'width': self.width,
             'height': self.height,
         }
