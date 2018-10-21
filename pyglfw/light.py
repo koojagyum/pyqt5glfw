@@ -29,7 +29,6 @@ def load_light(desc):
             specular=specular
         )
     elif class_name == 'PointLight':
-        print(desc)
         position = _pick_nparray(desc, 'position')
         ambient = _pick_nparray(desc, 'ambient')
         diffuse = _pick_nparray(desc, 'diffuse')
