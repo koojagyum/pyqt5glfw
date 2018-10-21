@@ -1,5 +1,5 @@
 {
-    "name": "triangle scene",
+    "name": "scene triangle",
     "resources": [
         {
             "type": "model",
@@ -8,6 +8,12 @@
     ],
     "lights": [
         {
+            "name": "dirLight",
+            "class": "DirectionalLight",
+            "direction": [-0.2, -0.1, -0.3],
+            "ambient": [0.1, 0.1, 0.1],
+            "diffuse": [1.0, 1.0, 1.0],
+            "specular": [0.0, 0.0, 0.0]
         }
     ],
     "instances": [
