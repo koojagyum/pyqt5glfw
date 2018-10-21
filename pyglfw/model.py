@@ -1,10 +1,12 @@
 import json
 import numpy as np
+import os
 import pyrr
 import random
 
 from .camera import Camera
 from .light import DirectionalLight
+from .material import load_material
 from .renderer import Renderer
 from .renderer import resource_path
 
@@ -21,16 +23,27 @@ def debug(msg):
         print(msg)
 
 
-def load_model(desc):
-    def _pick(key, dic, dtype=np.float32):
+def load_model(desc, basepath='.'):
+    def _pick(key, dic, default=None):
+        if key not in dic:
+            return default
+        return dic[key]
+
+    def _pick_nparray(key, dic, dtype=np.float32):
         if key not in dic:
             return None
         return np.asarray(dic[key], dtype=dtype)
 
-    vertices = _pick('vertices', desc, dtype=np.float32)
-    edges = _pick('edges', desc, dtype=np.uint8)
-    faces = _pick('faces', desc, dtype=np.uint8)
-    color = _pick('color', desc, dtype=np.float32)
+    def _pick_path(key, dic, default=None):
+        if key not in dic:
+            return default
+        return os.path.join(basepath, dic[key])
+
+    vertices = _pick_nparray('vertices', desc, dtype=np.float32)
+    edges = _pick_nparray('edges', desc, dtype=np.uint8)
+    faces = _pick_nparray('faces', desc, dtype=np.uint8)
+    color = _pick_nparray('color', desc, dtype=np.float32)
+    material_desc = _pick('material', desc)
 
     attrs = None
     key_attr = 'attributes'
@@ -43,20 +56,36 @@ def load_model(desc):
     if 'name' in desc:
         name = desc['name']
 
-    return ColorModel(
+    color_model = ColorModel(
         name=name,
         vertices=vertices,
         edges=edges,
         faces=faces,
         color=color,
-        attributes=attrs
+        attributes=attrs.copy()
     )
+
+    if material_desc is not None:
+        attrs.pop('color', None)
+        material = load_material(material_desc, basepath)
+        material_model = TextureModel(
+            name=name,
+            vertices=vertices,
+            edges=edges,
+            faces=faces,
+            attributes=attrs,
+            material=material
+        )
+        return material_model
+
+    return color_model
 
 
 def load_fromjson(jsonpath):
     with open(jsonpath) as f:
         desc = json.load(f)
-        return load_model(desc)
+        basepath = os.path.dirname(jsonpath)
+        return load_model(desc, basepath)
 
     return None
 
@@ -310,3 +339,160 @@ class ModelRenderer(Renderer):
         super().dispose()
         if self.model is not None:
             self.model.dispose()
+
+
+class TextureModel:
+
+    ATTR_ORDER = [
+        # 'position',
+        'normal',
+        'texcoords',
+    ]
+
+    def __init__(self,
+                 name='',
+                 vertices=None,
+                 edges=None, faces=None,
+                 attributes=None,
+                 material=None):
+        self.name = name
+        self._vertices = None
+        self._attrs = {}
+        self._vertices_pending = None
+        self._attrs_pending = None
+
+        self._vertexobj = None
+        self._indexobj_edges = None
+        self._indexobj_faces = None
+
+        self.vertices = vertices
+        self.attrs = attributes
+        self.material = material
+
+        self._edges = edges
+        self._faces = faces
+
+    def prepare(self):
+        if self._edges is not None and \
+           self._indexobj_edges is None:
+            self._indexobj_edges = IndexObject(self._edges)
+        if self._faces is not None and \
+           self._indexobj_faces is None:
+            self._indexobj_faces = IndexObject(self._faces)
+
+    def draw(self, program):
+        self._update_geometry()
+
+        if self._vertexobj is None:
+            return
+
+        if self.material is not None:
+            self.material.update(program)
+
+        with self._vertexobj as vo:
+            glPointSize(8)
+            glDrawArrays(GL_POINTS, 0, vo.vertex_count)
+            if self._indexobj_edges is not None:
+                with self._indexobj_edges as ebo:
+                    glDrawElements(
+                        GL_LINES,
+                        ebo.count,
+                        GL_UNSIGNED_BYTE,
+                        None
+                    )
+            if self._indexobj_faces is not None:
+                with self._indexobj_faces as ebo:
+                    glDrawElements(
+                        GL_TRIANGLES,
+                        ebo.count,
+                        GL_UNSIGNED_BYTE,
+                        None
+                    )
+
+    def dispose(self):
+        self._indexobj_edges = None
+        self._indexobj_faces = None
+
+    def _update_geometry(self):
+        if not self._check_pending_data():
+            return
+
+        v = self._build_data()
+
+        if self._vertexobj is not None and \
+           self._vertexobj.update(v):
+            return
+
+        self._vertexobj = VertexObject(
+            v,
+            self._alignment
+        )
+
+    def _check_pending_data(self):
+        pending_check = self._vertices_pending is None and \
+                        self._attrs_pending is None
+        if pending_check:
+            return False
+
+        if self._vertices_pending is not None:
+            self._vertices = self._vertices_pending
+            self._vertices_pending = None
+
+        # It does not make sense that color(or others) would be
+        # updated without any vertices
+        if self.vertices is None:
+            return False
+
+        if self._attrs_pending is not None:
+            self._attrs = self._attrs_pending
+            self._attrs_pending = None
+
+        return True
+
+    def _build_data(self):
+
+        def _concat_withname(v, name):
+            if name in self.attrs:
+                return np.column_stack((v, self.attrs[name]))
+            return v
+
+        v = self.vertices
+        if self.attrs is not None:
+            for attr_name in self.ATTR_ORDER:
+                # if attr_name == 'position':
+                #     continue
+                v = _concat_withname(v, attr_name)
+
+        return v
+
+    def _concat_withattrs(self, v, attrs):
+        data = v
+        for attr in attrs:
+            data = np.column_stack((data, attr))
+        return data
+
+    @property
+    def vertices(self):
+        return self._vertices
+
+    @vertices.setter
+    def vertices(self, value):
+        self._vertices_pending = value
+
+    @property
+    def attrs(self):
+        return self._attrs
+
+    @attrs.setter
+    def attrs(self, value):
+        self._attrs_pending = value
+
+    @property
+    def _alignment(self):
+        a = [self.vertices.shape[1]]
+
+        for attr_name in self.ATTR_ORDER:
+            if attr_name in self.attrs:
+                a.append(self.attrs[attr_name].shape[1])
+
+        return a
