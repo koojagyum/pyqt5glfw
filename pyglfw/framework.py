@@ -263,7 +263,6 @@ class Texture:
         self._target = kwargs.pop('target', self._target)
         self._unit = kwargs.pop('unit', self._unit)
         self._format = kwargs.pop('format', self._format)
-        self.unit_number = self._unit - GL_TEXTURE0
 
         image = kwargs.pop('image', None)
         if image is not None:
@@ -299,6 +298,30 @@ class Texture:
     def id(self, value):
         # id is a read-only property
         raise AttributeError
+
+    @property
+    def unit_number(self):
+        return self.unit - GL_TEXTURE0
+
+    @property
+    def target(self):
+        return self._target
+
+    @property
+    def unit(self):
+        return self._unit
+
+    @property
+    def format(self):
+        return self._format
+
+    @property
+    def width(self):
+        return self._width
+
+    @property
+    def height(self):
+        return self._height
 
 
 class Framebuffer:
