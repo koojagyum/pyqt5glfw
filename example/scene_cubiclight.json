@@ -1,0 +1,46 @@
+{
+    "name": "scene cubiclight",
+    "resources": [
+        {
+            "type": "model",
+            "filepath": "./cubic.json"
+        }
+    ],
+    "lights": [
+        {
+            "name": "pointLight",
+            "class": "PointLight",
+            "position": [0.2, 0.0, 1.0],
+            "ambient": [0.1, 0.1, 0.1],
+            "diffuse": [1.0, 1.0, 1.0],
+            "specular": [0.0, 0.0, 0.0]
+        }
+    ],
+    "instances": [
+        {
+            "name": "cubic",
+            "model": "cubic",
+            "renderer": "InstanceRenderer",
+            "translation": [0.0, 0.0, 0.0],
+            "rotation": [0.0, 0.0, 0.0],
+            "scale": [1.2, 1.2, 1.2]
+        },
+        {
+            "name": "lamp",
+            "model": "cubic",
+            "renderer": "MonoInstanceRenderer",
+            "translation": [0.2, 0.0, 1.0],
+            "rotation": [0.0, 0.0, 0.0],
+            "scale": [0.2, 0.2, 0.2]
+        }
+    ],
+    "camera": {
+        "position": [0.0, 0.0, 3.0],
+        "up": [0.0, 1.0, 0.0],
+        "rotation": [-90.0, 0.0, 0.0],
+        "fov": 45.0,
+        "aspect_ratio": 1.0,
+        "near_distance": 0.1,
+        "far_distance": 100.0
+    }
+}
