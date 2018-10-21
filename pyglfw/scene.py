@@ -198,6 +198,9 @@ class Scene:
         if self.renderer is not None:
             self.renderer.prepare()
 
+    def reshape(self, w, h):
+        glViewport(0, 0, w, h)
+
     def render(self):
         if self.renderer is not None:
             self.renderer.render()
