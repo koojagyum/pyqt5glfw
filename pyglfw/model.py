@@ -82,7 +82,7 @@ class Model:
         self._color_pending = None
         self._attrs_pending = None
 
-        self._vertex_object = None
+        self._vertexobj = None
         self._indexobj_edges = None
         self._indexobj_faces = None
 
@@ -112,10 +112,10 @@ class Model:
     def draw(self, program):
         self._update_geometry()
 
-        if self._vertex_object is None:
+        if self._vertexobj is None:
             return
 
-        with self._vertex_object as vo:
+        with self._vertexobj as vo:
             glPointSize(8)
             glDrawArrays(GL_POINTS, 0, vo.vertex_count)
             if self._indexobj_edges is not None:
@@ -145,11 +145,11 @@ class Model:
 
         v = self._build_data()
 
-        if self._vertex_object is not None and \
-           self._vertex_object.update(v):
+        if self._vertexobj is not None and \
+           self._vertexobj.update(v):
             return
 
-        self._vertex_object = VertexObject(
+        self._vertexobj = VertexObject(
             v,
             self._alignment
         )
