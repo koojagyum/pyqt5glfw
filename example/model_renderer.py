@@ -4,6 +4,9 @@ import numpy as np
 import sys
 
 from pyglfw.camera import Camera
+from pyglfw.instance import ModelInstance
+from pyglfw.instance import MonoInstanceRenderer
+from pyglfw.light import DirectionalLight
 from pyglfw.model import load_fromjson
 from pyglfw.model import ModelRenderer
 from PyQt5.QtWidgets import QApplication
@@ -18,11 +21,35 @@ def debug(msg):
         print(msg)
 
 
-def test_model_json(jsonpath):
+def test_model_light(jsonpath):
     app = QApplication(sys.argv)
 
     model = load_fromjson(jsonpath)
-    renderer = ModelRenderer(model=model, camera=Camera())
+    light = DirectionalLight(
+        direction=np.array([-0.2, -0.1, -0.3], dtype=np.float32)
+    )
+
+    renderer = ModelRenderer(model=model, camera=Camera(), lights=[light])
+    renderer.camera.yaw = math.radians(240.0)
+    renderer.camera.pitch = math.radians(-18.0)
+    renderer.camera.position = np.array([1.0, 1.0, 1.8], dtype=np.float32)
+
+    w = GLWidget()
+    w.renderer = renderer
+    w.keyPressed.connect(renderer.camera.key_pressed)
+    w.show()
+
+    sys.exit(app.exec_())
+
+
+def test_model_mono(jsonpath):
+    app = QApplication(sys.argv)
+
+    model = load_fromjson(jsonpath)
+    instance = ModelInstance(model=model)
+
+    renderer = MonoInstanceRenderer(camera=Camera())
+    renderer.instances.append(instance)
     renderer.camera.yaw = math.radians(240.0)
     renderer.camera.pitch = math.radians(-18.0)
     renderer.camera.position = np.array([1.0, 1.0, 1.8], dtype=np.float32)
@@ -68,33 +95,6 @@ def test_model_attr(jsonpath):
     sys.exit(app.exec_())
 
 
-def test_model_textbook(jsonpath):
-    frame_size = (640, 480)
-
-    app = QApplication(sys.argv)
-
-    model = load_fromjson(jsonpath)
-    renderer = ModelRenderer(model=model, camera=Camera())
-    renderer.camera.yaw = math.radians(-90.0)
-    renderer.camera.position = np.array(
-        [57.0, 41.0, 247.0], dtype=np.float32
-    )
-    renderer.camera.SPEED = 3.0
-    renderer.camera.set_projection(
-        aspect_ratio=frame_size[0]/frame_size[1],
-        far_distance=1000.0,
-        near_distance=0.1
-    )
-
-    w = GLWidget()
-    w.renderer = renderer
-    w.keyPressed.connect(renderer.camera.key_pressed)
-    w.resize(frame_size[0], frame_size[1])
-    w.show()
-
-    sys.exit(app.exec_())
-
-
 def main():
     global verbose
 
@@ -110,15 +110,23 @@ def main():
         required=True,
         help='Model JSON file path'
     )
+    parser.add_argument(
+        '--mono', '-m',
+        action='store_true',
+        default=False,
+        help='Whether using mono renderer or directional light'
+    )
 
     args = parser.parse_args()
 
     verbose = args.verbose
     filepath = args.filepath
+    use_mono = args.mono
 
-    # test_model_attr(filepath)
-    test_model_json(filepath)
-    # test_model_textbook(filepath)
+    if use_mono:
+        test_model_mono(filepath)
+    else:
+        test_model_light(filepath)
 
 
 if __name__ == '__main__':
