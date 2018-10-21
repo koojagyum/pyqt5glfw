@@ -1,4 +1,3 @@
-import json
 import numpy as np
 import pyrr
 
@@ -7,10 +6,6 @@ from .light import DirectionalLight
 from .model import Model
 from .renderer import Renderer
 from .renderer import resource_path
-
-from OpenGL.GL import *
-from pyglfw.framework import IndexObject
-from pyglfw.framework import VertexObject
 
 
 verbose = True
@@ -62,12 +57,12 @@ class ModelInstance:
         return np.matmul(rot_mat, np.matmul(scale_mat, trans_mat))
 
 
-class InstanceRenderer(Renderer):
+class MonoInstanceRenderer(Renderer):
 
-    default_vs_path = resource_path('./shader/model_color_light.vs')
-    default_fs_path = resource_path('./shader/model_color_light.fs')
+    default_vs_path = resource_path('./shader/model_color.vs')
+    default_fs_path = resource_path('./shader/model_color.fs')
 
-    def __init__(self, name='', camera=None, light=None):
+    def __init__(self, name='', camera=None):
         super().__init__(
             vs_path=self.default_vs_path,
             fs_path=self.default_fs_path,
@@ -75,10 +70,6 @@ class InstanceRenderer(Renderer):
         )
         self.instances = []
         self.camera = camera
-        self.light = DirectionalLight(
-            name='dirLight',
-            direction=np.array([-0.2, -0.1, -0.3], dtype=np.float32)
-        )
 
     def prepare(self):
         super().prepare()
@@ -105,9 +96,6 @@ class InstanceRenderer(Renderer):
                 p.setMatrix4('view', self.camera.view_matrix)
                 p.setVec3f('viewPos', self.camera.position)
 
-            if self.light is not None:
-                self.light.update(p)
-
             for i in self.instances:
                 i.draw(p)
 
@@ -115,3 +103,29 @@ class InstanceRenderer(Renderer):
         super().dispose()
         for i in self.instances:
             i.dispose()
+
+
+class InstanceRenderer(MonoInstanceRenderer):
+
+    default_vs_path = resource_path('./shader/model_color_light.vs')
+    default_fs_path = resource_path('./shader/model_color_light.fs')
+
+    def __init__(self, name='', camera=None, light=None):
+        super().__init__(
+            name=name,
+            camera=camera
+        )
+        self.light = DirectionalLight(
+            name='dirLight',
+            direction=np.array([-0.2, -0.1, -0.3], dtype=np.float32)
+        )
+
+    def render(self):
+        if len(self.instances) == 0:
+            return
+
+        with self._program as p:
+            if self.light is not None:
+                self.light.update(p)
+
+        super().render()
