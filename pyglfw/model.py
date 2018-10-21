@@ -43,7 +43,7 @@ def load_model(desc):
     if 'name' in desc:
         name = desc['name']
 
-    return Model(
+    return ColorModel(
         name=name,
         vertices=vertices,
         edges=edges,
@@ -61,7 +61,7 @@ def load_fromjson(jsonpath):
     return None
 
 
-class Model:
+class ColorModel:
 
     ATTR_ORDER = [
         # 'position',

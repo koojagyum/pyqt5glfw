@@ -3,7 +3,6 @@ import pyrr
 
 from .camera import Camera
 from .light import DirectionalLight
-from .model import Model
 from .renderer import Renderer
 from .renderer import resource_path
 
