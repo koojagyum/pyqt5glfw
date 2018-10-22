@@ -34,6 +34,7 @@ def load_material(desc, basepath='.'):
     specular_path = _pick_path(desc, 'specular')
     normal_path = _pick_path(desc, 'normal')
     depth_path = _pick_path(desc, 'depth')
+    shininess = _pick(desc, 'shininess', 1.0)
 
     debug(f'name: {name}')
     debug(f'diffuse_path: {diffuse_path}')
@@ -42,11 +43,13 @@ def load_material(desc, basepath='.'):
     debug(f'depth_path: {depth_path}')
 
     material = Material(name=name)
+    material.shininess = shininess
+
     def _add_image(name, imgpath, to):
         if imgpath is not None:
             img = cv2.imread(imgpath)
             img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-            to.add_image('diffuse', img)
+            to.add_image(name, img)
 
     _add_image('diffuse', diffuse_path, material)
     _add_image('specular', specular_path, material)
@@ -71,6 +74,7 @@ class Material:
         self.name = name
         self.textures = {}
         self._images_pending = {}
+        self.shininess = 1.0
 
     def _update_textures(self):
         for name, image in self._images_pending.items():
@@ -99,8 +103,10 @@ class Material:
     def update(self, program):
         self._update_textures()
         for texname, tex in self.textures.items():
-            with tex:
-                program.setInt(self.name + '.' + texname, tex.unit_number)
+            tex.bind()
+            program.setInt(self.name + '.' + texname, tex.unit_number)
+
+        program.setFloat(self.name + '.' + 'shininess', self.shininess)
 
 
 def main():

@@ -60,15 +60,34 @@ class ModelInstance:
 
 class MonoInstanceRenderer(Renderer):
 
-    default_vs_path = resource_path('./shader/model_color.vs')
-    default_fs_path = resource_path('./shader/model_color.fs')
+    default_vs_path = (
+        resource_path('./shader/model_color.vs'),
+        resource_path('./shader/model_mat_mono.vs')
+    )
+    default_fs_path = (
+        resource_path('./shader/model_color.fs'),
+        resource_path('./shader/model_mat_mono.fs')
+    )
 
-    def __init__(self, name='', camera=None):
+    def __init__(
+            self,
+            vs_path=None,
+            fs_path=None,
+            gs_path=None,
+            name='',
+            camera=None,
+            use_material=False):
+        if vs_path is None or fs_path is None:
+            vs_path = self.default_vs_path[use_material]
+            fs_path = self.default_fs_path[use_material]
+
         super().__init__(
-            vs_path=self.default_vs_path,
-            fs_path=self.default_fs_path,
+            vs_path=vs_path,
+            fs_path=fs_path,
+            gs_path=gs_path,
             name=name
         )
+
         self.instances = []
         self.camera = camera
 
@@ -87,6 +106,8 @@ class MonoInstanceRenderer(Renderer):
             i.prepare()
 
     def render(self):
+        super().render()
+
         if len(self.instances) == 0:
             return
 
@@ -108,17 +129,40 @@ class MonoInstanceRenderer(Renderer):
 
 class InstanceRenderer(MonoInstanceRenderer):
 
-    default_vs_path = resource_path('./shader/model_color_light.vs')
-    default_fs_path = resource_path('./shader/model_color_light.fs')
+    default_vs_path = (
+        resource_path('./shader/model_color_light.vs'),
+        resource_path('./shader/model_mat.vs')
+    )
+    default_fs_path = (
+        resource_path('./shader/model_color_light.fs'),
+        resource_path('./shader/model_mat.fs')
+    )
 
-    def __init__(self, name='', camera=None, lights=[]):
+    def __init__(
+            self,
+            vs_path=None,
+            fs_path=None,
+            gs_path=None,
+            name='',
+            camera=None,
+            lights=[],
+            use_material=False):
+        if vs_path is None or fs_path is None:
+            vs_path = self.default_vs_path[use_material]
+            fs_path = self.default_fs_path[use_material]
+
         super().__init__(
+            vs_path=vs_path,
+            fs_path=fs_path,
+            gs_path=gs_path,
             name=name,
             camera=camera
         )
         self.lights = lights
 
     def render(self):
+        super().render()
+
         if len(self.instances) == 0:
             return
 

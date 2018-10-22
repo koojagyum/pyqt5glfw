@@ -255,7 +255,9 @@ class Texture:
         glActiveTexture(self._unit)
         glBindTexture(self._target, 0)
 
-    def bind(self):
+    def bind(self, active_texture=True):
+        if active_texture:
+            glActiveTexture(self._unit)
         glBindTexture(self._target, self.id)
 
     # image is numpy uint8 array

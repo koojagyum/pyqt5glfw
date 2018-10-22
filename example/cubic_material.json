@@ -2,9 +2,10 @@
     "name": "cubic",
     "color": [1.0, 0.0, 1.0],
     "material": {
-        "name": "container2",
+        "name": "material",
         "diffuse": "container2.png",
-        "specular": "container2_specular.png"
+        "specular": "container2_specular.png",
+        "shininess": 64.0
     },
     "vertices": [
         [-0.5, -0.5, -0.5],

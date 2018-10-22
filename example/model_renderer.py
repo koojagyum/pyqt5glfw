@@ -6,9 +6,11 @@ import sys
 from pyglfw.camera import Camera
 from pyglfw.instance import ModelInstance
 from pyglfw.instance import MonoInstanceRenderer
+from pyglfw.instance import InstanceRenderer
 from pyglfw.light import DirectionalLight
 from pyglfw.model import load_fromjson
 from pyglfw.model import ModelRenderer
+from pyglfw.model import TextureModel
 from PyQt5.QtWidgets import QApplication
 from pyqt5glfw.glwidget import GLWidget
 
@@ -25,11 +27,18 @@ def test_model_light(jsonpath):
     app = QApplication(sys.argv)
 
     model = load_fromjson(jsonpath)
+    instance = ModelInstance(model=model)
     light = DirectionalLight(
         direction=np.array([-0.2, -0.1, -0.3], dtype=np.float32)
     )
 
-    renderer = ModelRenderer(model=model, camera=Camera(), lights=[light])
+    use_material = type(model) is TextureModel
+    renderer = InstanceRenderer(
+        camera=Camera(),
+        lights=[light],
+        use_material=use_material
+    )
+    renderer.instances.append(instance)
     renderer.camera.yaw = math.radians(240.0)
     renderer.camera.pitch = math.radians(-18.0)
     renderer.camera.position = np.array([1.0, 1.0, 1.8], dtype=np.float32)
@@ -48,7 +57,11 @@ def test_model_mono(jsonpath):
     model = load_fromjson(jsonpath)
     instance = ModelInstance(model=model)
 
-    renderer = MonoInstanceRenderer(camera=Camera())
+    use_material = type(model) is TextureModel
+    renderer = MonoInstanceRenderer(
+        camera=Camera(),
+        use_material=use_material
+    )
     renderer.instances.append(instance)
     renderer.camera.yaw = math.radians(240.0)
     renderer.camera.pitch = math.radians(-18.0)
