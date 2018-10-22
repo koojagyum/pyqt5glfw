@@ -3,7 +3,7 @@
     "resources": [
         {
             "type": "model",
-            "filepath": "./cubic.json"
+            "filepath": "./cubic_material.json"
         }
     ],
     "lights": [
