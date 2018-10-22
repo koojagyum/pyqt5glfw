@@ -63,10 +63,17 @@ class MonoInstanceRenderer(Renderer):
     default_vs_path = resource_path('./shader/model_color.vs')
     default_fs_path = resource_path('./shader/model_color.fs')
 
-    def __init__(self, name='', camera=None):
+    def __init__(
+            self,
+            vs_path=default_vs_path,
+            fs_path=default_fs_path,
+            gs_path=None,
+            name='',
+            camera=None):
         super().__init__(
-            vs_path=self.default_vs_path,
-            fs_path=self.default_fs_path,
+            vs_path=vs_path,
+            fs_path=fs_path,
+            gs_path=gs_path,
             name=name
         )
         self.instances = []
@@ -111,8 +118,18 @@ class InstanceRenderer(MonoInstanceRenderer):
     default_vs_path = resource_path('./shader/model_color_light.vs')
     default_fs_path = resource_path('./shader/model_color_light.fs')
 
-    def __init__(self, name='', camera=None, lights=[]):
+    def __init__(
+            self,
+            vs_path=default_vs_path,
+            fs_path=default_fs_path,
+            gs_path=None,
+            name='',
+            camera=None,
+            lights=[]):
         super().__init__(
+            vs_path=vs_path,
+            fs_path=fs_path,
+            gs_path=gs_path,
             name=name,
             camera=camera
         )
