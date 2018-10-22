@@ -43,7 +43,7 @@ def load_resources(resources_dic, basepath='.'):
             desc = json.load(f)
 
         if resource_type == 'model':
-            model = load_model(desc)
+            model = load_model(desc, basepath)
             model_list[model.name] = model
 
     resource_list['model'] = model_list
