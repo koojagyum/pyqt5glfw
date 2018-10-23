@@ -161,8 +161,6 @@ class InstanceRenderer(MonoInstanceRenderer):
         self.lights = lights
 
     def render(self):
-        super().render()
-
         if len(self.instances) == 0:
             return
 
