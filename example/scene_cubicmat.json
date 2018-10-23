@@ -3,7 +3,11 @@
     "resources": [
         {
             "type": "model",
-            "filepath": "./cubic_material.json"
+            "filepath": "./model_container.json"
+        },
+        {
+            "type": "model",
+            "filepath": "./model_monocubic.json"
         }
     ],
     "lights": [
@@ -13,13 +17,16 @@
             "position": [0.2, 0.0, 1.0],
             "ambient": [0.1, 0.1, 0.1],
             "diffuse": [1.0, 1.0, 1.0],
-            "specular": [0.0, 0.0, 0.0]
+            "specular": [0.0, 0.0, 0.0],
+            "constant": 1.0,
+            "linear": 0.09,
+            "quadratic": 0.032
         }
     ],
     "instances": [
         {
             "name": "cubic",
-            "model": "cubic",
+            "model": "container",
             "renderer": "InstanceRenderer",
             "translation": [0.0, 0.0, 0.0],
             "rotation": [0.0, 0.0, 0.0],
@@ -27,7 +34,7 @@
         },
         {
             "name": "lamp",
-            "model": "cubic",
+            "model": "monocubic",
             "renderer": "MonoInstanceRenderer",
             "translation": [0.2, 0.0, 1.0],
             "rotation": [0.0, 0.0, 0.0],
