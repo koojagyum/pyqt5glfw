@@ -288,6 +288,10 @@ class ColorModel:
 
         return a
 
+    @property
+    def use_material(self):
+        return False
+
 
 class ModelRenderer(Renderer):
 
@@ -496,3 +500,7 @@ class TextureModel:
                 a.append(self.attrs[attr_name].shape[1])
 
         return a
+
+    @property
+    def use_material(self):
+        return True

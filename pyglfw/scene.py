@@ -70,10 +70,17 @@ def load_instance(instances_dic, model_list):
         rotation = _pick(i, 'rotation')
         scale = _pick(i, 'scale')
 
+        renderer_spec = {
+            'class': renderer_name,
+            'params': {
+                'use_material': model.use_material
+            }
+        }
+
         instance = ModelInstance(
             name=name,
             model=model,
-            renderer_spec=renderer_name,
+            renderer_spec=renderer_spec,
             translation=translation,
             rotation=rotation,
             scale=scale

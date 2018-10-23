@@ -20,7 +20,7 @@ class ModelInstance:
     def __init__(
             self, name='',
             model=None,
-            renderer_spec='',
+            renderer_spec={},
             translation=[0.0, 0.0, 0.0],
             rotation=[0.0, 0.0, 0.0],
             scale=[1.0, 1.0, 1.0]):
