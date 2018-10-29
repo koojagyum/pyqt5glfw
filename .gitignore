@@ -6,3 +6,5 @@ GTAGS
 
 __pycache__
 model
+
+*.qmlc
