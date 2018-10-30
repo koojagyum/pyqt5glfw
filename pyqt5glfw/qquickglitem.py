@@ -26,6 +26,8 @@ def debug(msg):
 
 class QQuickGLItem(QQuickItem):
 
+    keyPressed = pyqtSignal(int, bool)
+
     def __init__(self, parent=None):
         super(QQuickGLItem, self).__init__(
             parent=parent
@@ -35,6 +37,12 @@ class QQuickGLItem(QQuickItem):
         self._next_renderer = None
 
         self.windowChanged.connect(self._onWindowChanged)
+        self.setProperty('focus', True)
+
+        # from pyglfw.scene import load_fromjson
+        # scene = load_fromjson('example/scene_cubicmat.json')
+        # self.keyPressed.connect(scene.camera.key_pressed)
+        # self.renderer = scene
 
     def _onWindowChanged(self, window):
         if window is not None:
@@ -62,13 +70,17 @@ class QQuickGLItem(QQuickItem):
         if self._renderer:
             self._renderer.prepare()
 
-        self.window().resetOpenGLState()
+        if self.window() is not None:
+            self.window().resetOpenGLState()
 
     def invalidateUnderlay(self):
         if self._renderer:
             self._renderer.dispose()
 
-        self.window().resetOpenGLState()
+        self.setProperty('focus', False)
+
+        if self.window() is not None:
+            self.window().resetOpenGLState()
 
     def renderUnderlay(self):
         # debug('color: {}'.format(self.color().getRgbF()))
@@ -87,7 +99,8 @@ class QQuickGLItem(QQuickItem):
             glEnable(GL_CULL_FACE)
             self._renderer.render()
 
-        self.window().resetOpenGLState()
+        if self.window() is not None:
+            self.window().resetOpenGLState()
 
     def synchronizeUnderlay(self):
         pass
@@ -104,10 +117,16 @@ class QQuickGLItem(QQuickItem):
         return switched
 
     def keyPressEvent(self, event):
-        super(QQuickGLView, self).keyPressEvent(event)
+        super(QQuickGLItem, self).keyPressEvent(event)
         shift = event.modifiers() & Qt.ShiftModifier
         self.keyPressed.emit(event.key(), shift)
         self.update()
+
+    def update(self):
+        if self.window() is None:
+            super(QQuickGLItem, self).update()
+        else:
+            self.window().update()
 
     @property
     def renderer(self):
