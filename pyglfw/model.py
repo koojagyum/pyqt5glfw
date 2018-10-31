@@ -390,28 +390,26 @@ class TextureModel:
         if self._vertexobj is None:
             return
 
-        if self.material is not None:
-            self.material.update(program)
-
-        with self._vertexobj as vo:
-            glPointSize(8)
-            glDrawArrays(GL_POINTS, 0, vo.vertex_count)
-            if self._indexobj_edges is not None:
-                with self._indexobj_edges as ebo:
-                    glDrawElements(
-                        GL_LINES,
-                        ebo.count,
-                        GL_UNSIGNED_BYTE,
-                        None
-                    )
-            if self._indexobj_faces is not None:
-                with self._indexobj_faces as ebo:
-                    glDrawElements(
-                        GL_TRIANGLES,
-                        ebo.count,
-                        GL_UNSIGNED_BYTE,
-                        None
-                    )
+        with self.material(program):
+            with self._vertexobj as vo:
+                glPointSize(8)
+                glDrawArrays(GL_POINTS, 0, vo.vertex_count)
+                if self._indexobj_edges is not None:
+                    with self._indexobj_edges as ebo:
+                        glDrawElements(
+                            GL_LINES,
+                            ebo.count,
+                            GL_UNSIGNED_BYTE,
+                            None
+                        )
+                if self._indexobj_faces is not None:
+                    with self._indexobj_faces as ebo:
+                        glDrawElements(
+                            GL_TRIANGLES,
+                            ebo.count,
+                            GL_UNSIGNED_BYTE,
+                            None
+                        )
 
     def dispose(self):
         self._indexobj_edges = None

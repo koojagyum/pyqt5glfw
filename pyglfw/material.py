@@ -74,7 +74,23 @@ class Material:
         self.name = name
         self.textures = {}
         self._images_pending = {}
+        self._program = None
         self.shininess = 1.0
+
+    def __call__(self, program):
+        self._program = program
+        return self
+
+    def __enter__(self):
+        self._prev_texid = glGetIntegerv(GL_TEXTURE_BINDING_2D)
+        self._prev_texunit =  glGetIntegerv(GL_ACTIVE_TEXTURE)
+        self.update(self._program)
+        return self
+
+    def __exit__(self, exc_type, exc_value, tb):
+        self.restore()
+        glActiveTexture(self._prev_texunit)
+        glBindTexture(GL_TEXTURE_2D, self._prev_texid)
 
     def _update_textures(self):
         for name, image in self._images_pending.items():
@@ -107,6 +123,10 @@ class Material:
             program.setInt(self.name + '.' + texname, tex.unit_number)
 
         program.setFloat(self.name + '.' + 'shininess', self.shininess)
+
+    def restore(self):
+        for texname, tex in self.textures.items():
+            tex.unbind()
 
 
 def main():

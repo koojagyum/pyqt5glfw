@@ -4,15 +4,12 @@ import sys
 from OpenGL.GL import *
 
 from PyQt5.QtCore import pyqtSignal
-from PyQt5.QtCore import QObject
 from PyQt5.QtCore import QUrl
 from PyQt5.QtCore import Qt
-from PyQt5.QtGui import QColor
 from PyQt5.QtGui import QGuiApplication
-from PyQt5.QtQml import QQmlApplicationEngine
+from PyQt5.QtGui import QOpenGLFramebufferObject, QOpenGLFramebufferObjectFormat
 from PyQt5.QtQuick import QQuickView
-from PyQt5.QtQuick import QQuickItem
-from PyQt5.QtWidgets import QApplication
+from PyQt5.QtQuick import QQuickFramebufferObject
 from PyQt5.QtQml import qmlRegisterType
 
 
@@ -24,7 +21,7 @@ def debug(msg):
         print(msg)
 
 
-class QQuickGLItem(QQuickItem):
+class QQuickGLItem(QQuickFramebufferObject):
 
     keyPressed = pyqtSignal(int, bool)
 
@@ -33,77 +30,68 @@ class QQuickGLItem(QQuickItem):
             parent=parent
         )
 
-        self._renderer = None
-        self._next_renderer = None
-
+        self._qrenderer = None
         self.windowChanged.connect(self._onWindowChanged)
         self.setProperty('focus', True)
+
+
+    def createRenderer(self):
+        self._qrenderer = QQuickRenderer()
 
         # from pyglfw.scene import load_fromjson
         # scene = load_fromjson('example/scene_cubicmat.json')
         # self.keyPressed.connect(scene.camera.key_pressed)
-        # self.renderer = scene
+        # self._qrenderer.renderer = scene
+
+        return self._qrenderer
+
+    def keyPressEvent(self, event):
+        super(QQuickGLItem, self).keyPressEvent(event)
+        shift = event.modifiers() & Qt.ShiftModifier
+        self.keyPressed.emit(event.key(), shift)
+        self.update()
 
     def _onWindowChanged(self, window):
         if window is not None:
-            window.sceneGraphInitialized.connect(
-                self.initializeUnderlay,
-                type=Qt.DirectConnection
-            )
-            window.beforeSynchronizing.connect(
-                self.synchronizeUnderlay,
-                type=Qt.DirectConnection
-            )
-            window.beforeRendering.connect(
-                self.renderUnderlay,
-                type=Qt.DirectConnection
-            )
             window.sceneGraphInvalidated.connect(
-                self.invalidateUnderlay,
+                self._onInvalidateUnderlay,
                 type=Qt.DirectConnection
             )
-            window.setClearBeforeRendering(False)
 
-    def initializeUnderlay(self):
-        self._check_next_renderer()
-
-        if self._renderer:
-            self._renderer.prepare()
-
-        if self.window() is not None:
-            self.window().resetOpenGLState()
-
-    def invalidateUnderlay(self):
-        if self._renderer:
-            self._renderer.dispose()
-
+    def _onInvalidateUnderlay(self):
         self.setProperty('focus', False)
 
-        if self.window() is not None:
-            self.window().resetOpenGLState()
 
-    def renderUnderlay(self):
-        # debug('color: {}'.format(self.color().getRgbF()))
-        # glClearColor(
-        #     self.color().getRgbF()[0],
-        #     self.color().getRgbF()[1],
-        #     self.color().getRgbF()[2],
-        #     self.color().getRgbF()[3]
-        # )
+class QQuickRenderer(QQuickFramebufferObject.Renderer):
+
+    def __init__(self):
+        super(QQuickRenderer, self).__init__()
+
+        self._qfbo = None
+        self._renderer = None
+        self._next_renderer = None
+
+    def render(self):
+        # todo: specify color
+        glClearColor(0.0, 0.0, 0.0, 1.0)
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
 
         switched = self._check_next_renderer()
-        if self._renderer:
+        if self._renderer is not None:
             if switched:
                 self._renderer.prepare()
             glEnable(GL_CULL_FACE)
             self._renderer.render()
 
-        if self.window() is not None:
-            self.window().resetOpenGLState()
+    def createFramebufferObject(self, size):
+        format = QOpenGLFramebufferObjectFormat()
+        format.setAttachment(
+            QOpenGLFramebufferObject.CombinedDepthStencil
+        )
+        format.setSamples(4)
 
-    def synchronizeUnderlay(self):
-        pass
+        self._qfbo = QOpenGLFramebufferObject(size, format)
+        return self._qfbo
 
     def _check_next_renderer(self):
         switched = self._next_renderer is not None
@@ -115,18 +103,6 @@ class QQuickGLItem(QQuickItem):
             self._next_renderer = None
 
         return switched
-
-    def keyPressEvent(self, event):
-        super(QQuickGLItem, self).keyPressEvent(event)
-        shift = event.modifiers() & Qt.ShiftModifier
-        self.keyPressed.emit(event.key(), shift)
-        self.update()
-
-    def update(self):
-        if self.window() is None:
-            super(QQuickGLItem, self).update()
-        else:
-            self.window().update()
 
     @property
     def renderer(self):

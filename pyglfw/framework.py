@@ -252,13 +252,16 @@ class Texture:
         return self
 
     def __exit__(self, exc_type, exc_value, tb):
-        glActiveTexture(self._unit)
-        glBindTexture(self._target, 0)
+        self.unbind()
 
     def bind(self, active_texture=True):
         if active_texture:
             glActiveTexture(self._unit)
         glBindTexture(self._target, self.id)
+
+    def unbind(self):
+        glActiveTexture(self._unit)
+        glBindTexture(self._target, 0)
 
     # image is numpy uint8 array
     def update(self, **kwargs):
