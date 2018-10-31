@@ -82,6 +82,9 @@ class Material:
         return self
 
     def __enter__(self):
+        # todo
+        # we should check other texture bindings of texture targets
+        # currently only dealing with GL_TEXTURE_2D
         self._prev_texid = glGetIntegerv(GL_TEXTURE_BINDING_2D)
         self._prev_texunit =  glGetIntegerv(GL_ACTIVE_TEXTURE)
         self.update(self._program)

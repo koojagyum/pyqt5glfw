@@ -68,6 +68,7 @@ class QQuickRenderer(QQuickFramebufferObject.Renderer):
         super(QQuickRenderer, self).__init__()
 
         self._qfbo = None
+        self._window = None
         self._renderer = None
         self._next_renderer = None
 
@@ -83,6 +84,9 @@ class QQuickRenderer(QQuickFramebufferObject.Renderer):
             glEnable(GL_CULL_FACE)
             self._renderer.render()
 
+        if self._window is not None:
+            self._window.resetOpenGLState()
+
     def createFramebufferObject(self, size):
         format = QOpenGLFramebufferObjectFormat()
         format.setAttachment(
@@ -92,6 +96,10 @@ class QQuickRenderer(QQuickFramebufferObject.Renderer):
 
         self._qfbo = QOpenGLFramebufferObject(size, format)
         return self._qfbo
+
+    def synchronize(self, item):
+        # update data from main thread
+        self._window = item.window()
 
     def _check_next_renderer(self):
         switched = self._next_renderer is not None
