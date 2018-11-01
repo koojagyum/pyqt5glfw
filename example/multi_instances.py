@@ -3,9 +3,10 @@ import math
 import numpy as np
 import sys
 
+from pyglfw.camera import Camera
 from pyglfw.model import load_fromjson
-from pyglfw.model import InstanceRenderer
-from pyglfw.model import ModelInstance
+from pyglfw.instance import MonoInstanceRenderer
+from pyglfw.instance import ModelInstance
 from PyQt5.QtWidgets import QApplication
 from pyqt5glfw.glwidget import GLWidget
 
@@ -36,7 +37,7 @@ def test_json(jsonpath):
     instance2.translation = [0.0, 0.0, 1.0]
     instance2.rotation = [30.0, 0.0, 0.0]
 
-    renderer = InstanceRenderer()
+    renderer = MonoInstanceRenderer(camera=Camera())
     renderer.instances.append(instance1)
     renderer.instances.append(instance2)
 

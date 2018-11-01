@@ -3,6 +3,7 @@ import math
 import numpy as np
 import sys
 
+from pyglfw.camera import Camera
 from pyglfw.model import load_fromjson
 from pyglfw.model import ModelRenderer
 from PyQt5.QtWidgets import QApplication
@@ -22,7 +23,7 @@ def test_model_json(jsonpath):
 
     app = QApplication(sys.argv)
 
-    renderer = ModelRenderer(model=model)
+    renderer = ModelRenderer(model=model, camera=Camera())
     renderer.camera.yaw = math.radians(90.0)
     renderer.camera.position = np.array([0.0, 0.0, -1.0], dtype=np.float32)
 
