@@ -12,6 +12,8 @@ from PyQt5.QtQuick import QQuickView
 from PyQt5.QtQuick import QQuickFramebufferObject
 from PyQt5.QtQml import qmlRegisterType
 
+from pyglfw.renderer import RendererBase
+
 
 verbose = False
 
@@ -30,19 +32,18 @@ class QQuickGLItem(QQuickFramebufferObject):
             parent=parent
         )
 
+        self.renderer = None
         self._qrenderer = None
         self.windowChanged.connect(self._onWindowChanged)
         self.setProperty('focus', True)
 
-
-    def createRenderer(self):
-        self._qrenderer = QQuickRenderer()
-
         # from pyglfw.scene import load_fromjson
         # scene = load_fromjson('example/scene_cubicmat.json')
         # self.keyPressed.connect(scene.camera.key_pressed)
-        # self._qrenderer.renderer = scene
+        # self.renderer = scene
 
+    def createRenderer(self):
+        self._qrenderer = QQuickRenderer()
         return self._qrenderer
 
     def keyPressEvent(self, event):
@@ -100,6 +101,7 @@ class QQuickRenderer(QQuickFramebufferObject.Renderer):
     def synchronize(self, item):
         # update data from main thread
         self._window = item.window()
+        self.renderer = item.renderer
 
     def _check_next_renderer(self):
         switched = self._next_renderer is not None
@@ -118,8 +120,14 @@ class QQuickRenderer(QQuickFramebufferObject.Renderer):
 
     @renderer.setter
     def renderer(self, value):
-        self._next_renderer = value
-        self.update()
+        if self._next_renderer != value:
+            if value is not None and \
+               not isinstance(value, RendererBase):
+                print(value)
+                raise TypeError
+
+            self._next_renderer = value
+            self.update()
 
 
 def run_qml(qmlpath):

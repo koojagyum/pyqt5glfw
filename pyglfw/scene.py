@@ -8,6 +8,7 @@ from .camera import Camera
 from .instance import ModelInstance
 from .light import load_light
 from .model import load_model
+from .renderer import RendererBase
 from .rendererman import RendererManager
 
 from OpenGL.GL import *
@@ -202,7 +203,7 @@ def test_json(jsonpath):
     sys.exit(app.exec_())
 
 
-class Scene:
+class Scene(RendererBase):
 
     def __init__(
             self,

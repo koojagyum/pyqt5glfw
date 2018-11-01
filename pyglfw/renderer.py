@@ -1,10 +1,13 @@
 import numpy as np
 
-from .framework import *
+from abc import *
 from OpenGL.GL import *
 from os.path import abspath
 from os.path import join
 from os.path import dirname
+
+from .framework import *
+
 
 __dir__ = abspath(dirname(__file__))
 
@@ -13,7 +16,26 @@ def resource_path(relpath):
     return join(__dir__, relpath)
 
 
-class Renderer:
+class RendererBase(metaclass=ABCMeta):
+
+    @abstractmethod
+    def prepare(self):
+        pass
+
+    @abstractmethod
+    def reshape(self, w, h):
+        pass
+
+    @abstractmethod
+    def render(self):
+        pass
+
+    @abstractmethod
+    def dispose(self):
+        pass
+
+
+class Renderer(RendererBase):
 
     default_vs_path = resource_path('./shader/basic.vs')
     default_fs_path = resource_path('./shader/basic.fs')
