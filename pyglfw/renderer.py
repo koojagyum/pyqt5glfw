@@ -108,7 +108,7 @@ class TriangleRenderer(Renderer):
         super().__init__(
             name=name
         )
-        self._vertex_object = None
+        self._vertexobj = None
 
     def prepare(self):
         super().prepare()
@@ -119,16 +119,16 @@ class TriangleRenderer(Renderer):
              +0.0, +0.5, +0.0, 0.0, 0.0, 1.0],
             dtype='float32'
         )
-        self._vertex_object = VertexObject(v, [3, 3])
+        self._vertexobj = VertexObject(v, [3, 3])
 
     def render(self):
         with self._program:
-            with self._vertex_object as vo:
+            with self._vertexobj as vo:
                 glDrawArrays(GL_TRIANGLES, 0, vo.vertex_count)
 
     def dispose(self):
         super().dispose()
-        self._vertex_object = None
+        self._vertexobj = None
 
 
 class RectangleRenderer(Renderer):
@@ -137,7 +137,7 @@ class RectangleRenderer(Renderer):
         super().__init__(
             name=name
         )
-        self._vertex_object = None
+        self._vertexobj = None
 
     def prepare(self):
         super().prepare()
@@ -154,11 +154,11 @@ class RectangleRenderer(Renderer):
              1, 3, 2],
             dtype='uint8'
         )
-        self._vertex_object = VertexObject(v, [3, 3], e)
+        self._vertexobj = VertexObject(v, [3, 3], e)
 
     def render(self):
         with self._program:
-            with self._vertex_object as vo:
+            with self._vertexobj as vo:
                 glDrawElements(
                     GL_TRIANGLES,
                     vo.element_count,
@@ -168,7 +168,7 @@ class RectangleRenderer(Renderer):
 
     def dispose(self):
         super().dispose()
-        self._vertex_object = None
+        self._vertexobj = None
 
 
 class TextureRenderer(Renderer):
@@ -185,7 +185,7 @@ class TextureRenderer(Renderer):
 
         self._image = None
         self._next_image = None
-        self._vertex_object = None
+        self._vertexobj = None
         self._texture = None
 
         self.image = image
@@ -212,7 +212,7 @@ class TextureRenderer(Renderer):
              1, 3, 2],
             dtype='uint8'
         )
-        self._vertex_object = VertexObject(v, [3, 2], e)
+        self._vertexobj = VertexObject(v, [3, 2], e)
         self._texture = Texture()
 
     def render(self):
@@ -223,7 +223,7 @@ class TextureRenderer(Renderer):
             self._next_image = None
 
         with self._program as program:
-            with self._vertex_object as vo:
+            with self._vertexobj as vo:
                 with self.texture as tex:
                     program.setInt('inputTexture', tex.unit_number)
                     glDrawElements(
@@ -235,7 +235,7 @@ class TextureRenderer(Renderer):
 
     def dispose(self):
         super().dispose()
-        self._vertex_object = None
+        self._vertexobj = None
         self._texture = None
         self._next_image = self._image
         self._image = None
