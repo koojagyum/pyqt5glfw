@@ -225,7 +225,7 @@ class TextureRenderer(Renderer):
         with self._program as program:
             with self._vertexobj as vo:
                 with self.texture as tex:
-                    program.setInt('inputTexture', tex.unit_number)
+                    program.setInt('input_texture', tex.unit_number)
                     glDrawElements(
                         GL_TRIANGLES,
                         vo.element_count,
