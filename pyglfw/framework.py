@@ -247,8 +247,7 @@ class Texture:
         glDeleteTextures(np.array([self.id], dtype='int32'))
 
     def __enter__(self):
-        glActiveTexture(self._unit)
-        glBindTexture(self._target, self.id)
+        self.bind(self, active_texture=True)
         return self
 
     def __exit__(self, exc_type, exc_value, tb):
