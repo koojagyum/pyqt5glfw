@@ -349,8 +349,9 @@ class TextureModel:
 
     ATTR_ORDER = [
         # 'position',
-        'normal',
+        # 'normal',
         'texcoords',
+        'normal',
     ]
 
     def __init__(self,
