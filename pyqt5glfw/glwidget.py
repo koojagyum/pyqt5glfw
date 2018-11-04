@@ -126,8 +126,13 @@ def test_widget():
     w = GLWidget()
     w.show()
 
-    from pyglfw.renderer import TriangleRenderer
-    w.renderer = TriangleRenderer()
+    # from pyglfw.renderer import TriangleRenderer
+    # w.renderer = TriangleRenderer()
+
+    from pyglfw.scene import load_fromjson
+    scene = load_fromjson('example/res/scene_rectangle.json')
+    w.keyPressed.connect(scene.camera.key_pressed)
+    w.renderer = scene
 
     sys.exit(app.exec_())
 
@@ -164,5 +169,5 @@ if __name__ == '__main__':
     args = parser.parse_args()
     verbose = args.verbose
 
-    # test_widget()
-    test_switching()
+    test_widget()
+    # test_switching()

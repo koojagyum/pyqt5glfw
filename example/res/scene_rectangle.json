@@ -1,0 +1,30 @@
+{
+    "name": "rectangle",
+    "resources": [
+        {
+            "type": "model",
+            "filepath": "./rectangle.json"
+        }
+    ],
+    "lights": [],
+    "instances": [
+        {
+            "name": "rectangle",
+            "model": "rectangle",
+            "renderer": "MonoInstanceRenderer",
+            "translation": [0.0, 0.0, 0.0],
+            "rotation": [0.0, 0.0, 0.0],
+            "scale": [1.0, 1.0, 1.0]
+        }
+    ],
+    "camera": {
+        "type": "orthographic",
+        "position": [0.0, 0.0, 1.0],
+        "up": [0.0, 1.0, 0.0],
+        "rotation": [-90.0, 0.0, 0.0],
+        "fov": 45.0,
+        "aspect_ratio": 1.0,
+        "near_distance": 0.1,
+        "far_distance": 100.0
+    }
+}

@@ -36,9 +36,10 @@ class QQuickGLItem(QQuickFramebufferObject):
         self._qrenderer = None
         self.windowChanged.connect(self._onWindowChanged)
         self.setProperty('focus', True)
+        self.setProperty('mirrorVertically', True)
 
         # from pyglfw.scene import load_fromjson
-        # scene = load_fromjson('example/scene_cubicmat.json')
+        # scene = load_fromjson('example/res/scene_rectangle.json')
         # self.keyPressed.connect(scene.camera.key_pressed)
         # self.renderer = scene
 
