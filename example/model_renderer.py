@@ -66,6 +66,9 @@ def test_model_mono(jsonpath):
     renderer.camera.yaw = math.radians(240.0)
     renderer.camera.pitch = math.radians(-18.0)
     renderer.camera.position = np.array([1.0, 1.0, 1.8], dtype=np.float32)
+    # renderer.camera.yaw = math.radians(-90.0)
+    # renderer.camera.pitch = math.radians(0.0)
+    # renderer.camera.position = np.array([0.0, 0.0, 1.0], dtype=np.float32)
 
     w = GLWidget()
     w.renderer = renderer

@@ -5,6 +5,7 @@ import os
 import sys
 
 from .camera import Camera
+from .camera import load_camera
 from .instance import ModelInstance
 from .light import load_light
 from .model import load_model
@@ -89,38 +90,6 @@ def load_instance(instances_dic, model_list):
         instance_list[name] = instance
 
     return instance_list
-
-
-def load_camera(camera_dic):
-    def _pick(dic, key):
-        if key not in dic:
-            return None
-        return dic[key]
-
-    position = _pick(camera_dic, 'position')
-    up = _pick(camera_dic, 'up')
-    rotation = _pick(camera_dic, 'rotation')
-    fov = _pick(camera_dic, 'fov')
-    aspect_ratio = _pick(camera_dic, 'aspect_ratio')
-    near_distance = _pick(camera_dic, 'near_distance')
-    far_distance = _pick(camera_dic, 'far_distance')
-    move_speed = _pick(camera_dic, 'move_speed')
-
-    camera = Camera()
-    camera.position = np.array(position, dtype=np.float32)
-    camera.world_up = np.array(up, dtype=np.float32)
-    camera.yaw = math.radians(rotation[0])
-    camera.pitch = math.radians(rotation[1])
-    camera.set_projection(
-        fov=fov,
-        aspect_ratio=aspect_ratio,
-        near_distance=near_distance,
-        far_distance=far_distance
-    )
-    if move_speed is not None:
-        camera.SPEED = move_speed
-
-    return camera
 
 
 def load_lights(lights_desc):

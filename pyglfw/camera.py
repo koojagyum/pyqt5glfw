@@ -13,6 +13,41 @@ def debug(msg):
         print(msg)
 
 
+def load_camera(camera_dic):
+    def _pick(dic, key):
+        if key not in dic:
+            return None
+        return dic[key]
+
+    position = _pick(camera_dic, 'position')
+    up = _pick(camera_dic, 'up')
+    rotation = _pick(camera_dic, 'rotation')
+    projection_type = _pick(camera_dic, 'type')
+
+    fov = _pick(camera_dic, 'fov')
+    aspect_ratio = _pick(camera_dic, 'aspect_ratio')
+    near_distance = _pick(camera_dic, 'near_distance')
+    far_distance = _pick(camera_dic, 'far_distance')
+
+    move_speed = _pick(camera_dic, 'move_speed')
+
+    camera = Camera(projection_type=projection_type)
+    camera.position = np.array(position, dtype=np.float32)
+    camera.world_up = np.array(up, dtype=np.float32)
+    camera.yaw = math.radians(rotation[0])
+    camera.pitch = math.radians(rotation[1])
+    camera.set_projection(
+        fov=fov,
+        aspect_ratio=aspect_ratio,
+        near_distance=near_distance,
+        far_distance=far_distance
+    )
+    if move_speed is not None:
+        camera.SPEED = move_speed
+
+    return camera
+
+
 class Camera:
 
     PITCH = math.radians(0.0)
@@ -20,7 +55,7 @@ class Camera:
     SPEED = 3.0 * 0.1
     SPEED_ROTATION = math.radians(3.0)
 
-    def __init__(self):
+    def __init__(self, projection_type=None):
         self.position = np.array(
             [0.0, 0.0, 3.0],
             dtype=np.float32
@@ -31,6 +66,9 @@ class Camera:
         )
         self.yaw = Camera.YAW
         self.pitch = Camera.PITCH
+        if projection_type is None:
+            projection_type = 'perspective'
+        self.projection_type = projection_type
 
         self.set_projection()
 
@@ -40,9 +78,16 @@ class Camera:
             aspect_ratio=1.0/1.0,
             near_distance = 0.1,
             far_distance = 100.0):
-        self._proj_matrix = pyrr.matrix44.create_perspective_projection(
-            fov, aspect_ratio, near_distance, far_distance
-        )
+        if self.projection_type == 'perspective':
+            self._proj_matrix = pyrr.matrix44.create_perspective_projection(
+                fov, aspect_ratio, near_distance, far_distance
+            )
+        elif self.projection_type == 'orthographic':
+            self._proj_matrix = pyrr.matrix44.create_orthogonal_projection(
+                -1.0, 1.0, -1.0, 1.0, 0.1, 100.0
+            )
+        else:
+            self._proj_matrix = pyrr.matrix44.create_identity()
 
     def key_pressed(self, key, shift):
         if not shift:
