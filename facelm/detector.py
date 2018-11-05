@@ -11,6 +11,7 @@ from . import downloader
 
 from matplotlib import pyplot as plt
 from matplotlib import patches
+from matplotlib import patheffects
 from threading import Timer
 
 
@@ -106,6 +107,27 @@ def plot_bboxes(image, bboxes):
     plt.show()
 
 
+def plot_lmindices(img, shape):
+    '''Plot for a single shape'''
+
+    fig, ax = plt.subplots()
+
+    ax.imshow(img)
+    ax.scatter(shape[:, 0], shape[:, 1], s=10, color='blue', edgecolor='black')
+
+    for i in range(shape.shape[0]):
+        txt = ax.text(
+            shape[i, 0],
+            shape[i, 1],
+            str(i),
+            fontsize=10,
+            color='white'
+        )
+        txt.set_path_effects([patheffects.withStroke(linewidth=1, foreground='black')])
+
+    plt.show()
+
+
 def test_bbox(image_path):
     detector = FaceDetector()
     image = cv2.imread(image_path)
@@ -122,6 +144,15 @@ def test_shape(image_path):
     _, shapes = detector.detect(image)
 
     plot_shapes(image, shapes)
+
+
+def test_lmindices(image_path):
+    detector = FaceDetector()
+    image = cv2.imread(image_path)
+    image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+    _, shapes = detector.detect(image)
+
+    plot_lmindices(image, shapes[0])
 
 
 def main():
@@ -148,7 +179,8 @@ def main():
     input_path = os.path.expanduser(input_path)
 
     # test_bbox(input_path)
-    test_shape(input_path)
+    # test_shape(input_path)
+    test_lmindices(input_path)
 
 
 if __name__ == '__main__':
