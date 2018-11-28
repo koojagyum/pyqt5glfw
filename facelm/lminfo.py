@@ -49,7 +49,7 @@ def _plot_lm_ndc(lm):
     plt.show()
 
 
-def load_lminfo_fromjson(jsonfile):
+def load_fromjson(jsonfile):
     def _pick(key, dic, default=None):
         if key not in dic:
             return default
@@ -67,7 +67,7 @@ def load_lminfo_fromjson(jsonfile):
     return LmInfo(name=name, v_lm=v_lm, imgpath=imgpath, lmtype=lmtype)
 
 
-def load_lminfo_fromimg(imgfile):
+def load_fromimg(imgfile):
     name = os.path.splitext(os.path.basename(imgfile))[0]
     jsonfile = os.path.splitext(imgfile)[0] + '.json'
 
@@ -87,10 +87,10 @@ class LmInfo:
             v_lm=[],
             imgpath=None,
             lmtype='dlib'):
+        self.lmtype = lmtype
         self.name = name
         self.v_lm = v_lm
         self.imgpath = imgpath
-        self.lmtype = lmtype
 
     def write(self, outfile):
         with open(outfile, 'w') as f:
@@ -111,13 +111,13 @@ class LmInfo:
 
 
 def test_write_json(imgfile, jsonfile):
-    lminfo = load_lminfo_fromimg(imgfile)
+    lminfo = load_fromimg(imgfile)
     lminfo.write(jsonfile)
     print(lminfo)
 
 
 def test_read_json(jsonfile):
-    lminfo = load_lminfo_fromjson(jsonfile)
+    lminfo = load_fromjson(jsonfile)
     print(lminfo)
 
     _plot_lm_ndc(lminfo.v_lm)
