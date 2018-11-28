@@ -62,8 +62,9 @@ def load_lminfo_fromjson(jsonfile):
     imgpath = _pick('imgpath', lminfo_desc)
     v_lm = _pick('vert_lm', lminfo_desc)
     v_lm = np.array(v_lm)
+    lmtype = _pick('lmtype', lminfo_desc, 'dlib')
 
-    return LmInfo(name=name, v_lm=v_lm, imgpath=imgpath)
+    return LmInfo(name=name, v_lm=v_lm, imgpath=imgpath, lmtype=lmtype)
 
 
 def load_lminfo_fromimg(imgfile):
@@ -75,7 +76,7 @@ def load_lminfo_fromimg(imgfile):
     _, shapes = detector.detect(img)
     v_lm = _to_ndc(shapes[0].astype(np.float32), (img.shape[1], img.shape[0]))
 
-    return LmInfo(name=name, v_lm=v_lm, imgpath=imgfile)
+    return LmInfo(name=name, v_lm=v_lm, imgpath=imgfile, lmtype='dlib')
 
 
 class LmInfo:
@@ -84,10 +85,12 @@ class LmInfo:
             self,
             name=None,
             v_lm=[],
-            imgpath=None):
+            imgpath=None,
+            lmtype='dlib'):
         self.name = name
         self.v_lm = v_lm
         self.imgpath = imgpath
+        self.lmtype = lmtype
 
     def write(self, outfile):
         with open(outfile, 'w') as f:
@@ -98,6 +101,7 @@ class LmInfo:
         data = {
             'name': self.name,
             'imgpath': self.imgpath,
+            'lmtype': self.lmtype,
             'vert_lm': self.v_lm.tolist()
         }
         return data
