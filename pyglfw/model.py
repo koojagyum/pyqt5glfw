@@ -121,7 +121,8 @@ class ColorModel:
         self.attrs = attributes
 
         if color is None and \
-           'color' not in attributes:
+           (attributes is None or \
+            'color' not in attributes):
             color = (
                 random.random(),
                 random.random(),
