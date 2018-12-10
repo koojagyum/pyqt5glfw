@@ -9,11 +9,62 @@ from threading import Thread
 from .renderer import TextureRenderer
 
 
+class FrameProvider:
+
+    def __init__(self, srcpath=None):
+        self._img = None
+        self._srcpath = None
+
+        self.srcpath = srcpath
+
+    def _load(self):
+        self._img = cv2.imread(self._srcpath)
+
+    @property
+    def frame(self):
+        return self._img
+
+    @property
+    def srcpath(self):
+        return self._srcpath
+
+    @srcpath.setter
+    def srcpath(self, value):
+        if self._srcpath != value:
+            self._srcpath = value
+            self._load()
+
+    @property
+    def width(self):
+        if self._img is not None:
+            return self._img.shape[0]
+        return 0.0
+
+    @property
+    def height(self):
+        if self._img is not None:
+            return self._img.shape[1]
+        return 0.0
+
+    @property
+    def aspect_ratio(self):
+        if self._img is not None:
+            return self._img.shape[0] / self._img.shape[1]
+        # Invalid case
+        return 0.0
+
+
 class Webcam:
 
     def __init__(self):
+        self._img = None
+        self._cap = None
+
+        self._load()
+
+    def _load(self):
         self._cap = cv2.VideoCapture(0)
-        __, self._frame = self._cap.read()
+        __, self._img = self._cap.read()
 
     # Create thread for capturing image
     def start(self):
@@ -32,14 +83,14 @@ class Webcam:
         while self._run:
             succeed, temp_frame = self._cap.read()
             if succeed:
-                self._frame = temp_frame
+                self._img = temp_frame
             self._run = self._run and succeed
 
     @property
     def frame(self):
         # Copy may cause some problems about performance
-        # return self._frame
-        return np.copy(self._frame)
+        # return self._img
+        return np.copy(self._img)
 
     @property
     def run(self):
@@ -52,6 +103,10 @@ class Webcam:
     @property
     def height(self):
         return self._cap.get(cv2.CAP_PROP_FRAME_HEIGHT)
+
+    @property
+    def aspect_ratio(self):
+        return float(self.height) / float(self.width)
 
     def __enter__(self):
         self.start()
