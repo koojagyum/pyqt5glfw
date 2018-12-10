@@ -8,6 +8,7 @@ import PyQt5GLfwTest 1.0
 Item {
     VideoView {
         anchors.fill: parent
+        videoSource: './media/video.mkv'
         play: true
     }
 }

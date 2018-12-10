@@ -3,6 +3,7 @@ import numpy as np
 import time
 
 from threading import Thread
+from threading import Condition
 # Sync using Condition causes critical performance down
 # from threading import Condition
 
@@ -59,12 +60,15 @@ class Webcam:
     def __init__(self):
         self._img = None
         self._cap = None
+        self._cap_cond = Condition()
 
         self._load()
 
     def _load(self):
-        self._cap = cv2.VideoCapture(0)
-        __, self._img = self._cap.read()
+        with self._cap_cond as cond:
+            self._cap = cv2.VideoCapture(0)
+            __, self._img = self._cap.read()
+            self._cap_cond.notifyAll()
 
     # Create thread for capturing image
     def start(self):
@@ -80,6 +84,10 @@ class Webcam:
         self._thread.join()
 
     def _update_frame(self):
+        if self._cap is None:
+            with self._cap_cond as cond:
+                self._cap_cond.wait()
+
         while self._run:
             succeed, temp_frame = self._cap.read()
             if succeed:
@@ -118,6 +126,34 @@ class Webcam:
     def __del__(self):
         self.stop()
         self._cap.release()
+
+
+class VideoPlayer(Webcam):
+
+    def __init__(self, srcpath=None):
+        self._img = None
+        self._srcpath = None
+        self._cap = None
+        self._cap_cond = Condition()
+
+        self.srcpath = srcpath
+
+    def _load(self):
+        if self.srcpath is not None:
+            with self._cap_cond as cond:
+                self._cap = cv2.VideoCapture(self.srcpath)
+                __, self._img = self._cap.read()
+                self._cap_cond.notifyAll()
+
+    @property
+    def srcpath(self):
+        return self._srcpath
+
+    @srcpath.setter
+    def srcpath(self, value):
+        if self._srcpath != value:
+            self._srcpath = value
+            self._load()
 
 
 class VideoRenderer(TextureRenderer):

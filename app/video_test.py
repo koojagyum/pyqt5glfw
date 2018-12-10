@@ -11,7 +11,7 @@ from PyQt5.QtQml import qmlRegisterType
 
 from .flip import FlipRenderer
 
-from pyglfw.video import Webcam
+from pyglfw.video import VideoPlayer
 from pyglfw.video import VideoRenderer
 from pyqt5glfw.qquickglitem import QQuickGLItem
 
@@ -24,15 +24,21 @@ class VideoView(QQuickGLItem):
         super(VideoView, self).__init__(parent=parent)
 
         self._play = False
-        self.webcam = Webcam()
+        self._videoSource = None
+        self.player = VideoPlayer()
 
         video = VideoRenderer(
-            video_source=self.webcam,
+            video_source=self.player,
             frame_block=self._update_frame
         )
+        # flip = FlipRenderer(
+        #     width=self.player.width,
+        #     height=self.player.height,
+        #     inner_renderer=video
+        # )
         flip = FlipRenderer(
-            width=self.webcam.width,
-            height=self.webcam.height,
+            width=720,
+            height=480,
             inner_renderer=video
         )
 
@@ -53,9 +59,18 @@ class VideoView(QQuickGLItem):
         if self._play != value:
             self._play = value
             if value:
-                self.webcam.start()
+                self.player.start()
             else:
-                self.webcam.stop()
+                self.player.stop()
+
+    @pyqtProperty(str)
+    def videoSource(self):
+        return self.player.srcpath
+
+    @videoSource.setter
+    def videoSource(self, value):
+        if self.videoSource != value:
+            self.player.srcpath = value
 
     # TODO: Add about resume
     def _onInvalidateUnderlay(self):
