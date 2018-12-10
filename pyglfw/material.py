@@ -121,11 +121,12 @@ class Material:
 
     def update(self, program):
         self._update_textures()
+        namespace = ('', str(self.name) + '.')[self.name is not None]
         for texname, tex in self.textures.items():
             tex.bind()
-            program.setInt(self.name + '.' + texname, tex.unit_number)
+            program.setInt(namespace + texname, tex.unit_number)
 
-        program.setFloat(self.name + '.' + 'shininess', self.shininess)
+        program.setFloat(namespace + 'shininess', self.shininess)
 
     def restore(self):
         for texname, tex in self.textures.items():
