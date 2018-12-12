@@ -3,7 +3,7 @@ import numpy as np
 
 from OpenGL.GL import *
 
-from pyglfw.framework import Framebuffer
+from pyglfw.fbo import Framebuffer
 from pyglfw.framework import VertexObject
 from pyglfw.renderer import TextureRenderer
 

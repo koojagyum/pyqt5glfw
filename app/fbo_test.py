@@ -2,7 +2,7 @@ import sys
 
 from OpenGL.GL import *
 from PyQt5.QtWidgets import QApplication
-from pyglfw.framework import Framebuffer
+from pyglfw.fbo import Framebuffer
 from pyglfw.framework import VertexObject
 from pyglfw.renderer import Renderer
 from pyglfw.renderer import TriangleRenderer
