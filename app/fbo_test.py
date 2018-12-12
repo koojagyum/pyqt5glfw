@@ -44,6 +44,17 @@ class FramebufferRenderer(TextureRenderer):
         self._framebuffer = None
         self._inner_renderer.dispose()
 
+    def setFramebufferSize(self, w=-1, h=-1):
+        print('setFramebufferSize: {}, {}'.format(w, h))
+
+        if w < 0:
+            w = self._framebuffer.width
+        if h < 0:
+            h = self._framebuffer.height
+
+        self._framebuffer.width = w
+        self._framebuffer.height = h
+
     @property
     def texture(self):
         return self._framebuffer.texture
@@ -55,6 +66,10 @@ def test_fbo():
     w = GLWidget()
     w.renderer = FramebufferRenderer()
     w.show()
+
+    from PyQt5.QtCore import QTimer
+    QTimer.singleShot(1000, lambda: w.renderer.setFramebufferSize(100, 100))
+    QTimer.singleShot(1001, lambda: w.update())
 
     sys.exit(app.exec_())
 

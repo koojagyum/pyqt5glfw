@@ -1,3 +1,5 @@
+import numpy as np
+
 from OpenGL.GL import *
 
 from .framework import Texture
@@ -14,6 +16,8 @@ class Framebuffer:
 
         self._width = width
         self._height = height
+        self._pending_width = -1
+        self._pending_height = -1
 
         self._attachment = GL_COLOR_ATTACHMENT0
         self._bind_point = GL_FRAMEBUFFER
@@ -31,6 +35,7 @@ class Framebuffer:
         self._prev_viewport = glGetIntegerv(GL_VIEWPORT)
         self._prev_fbo_id = glGetIntegerv(GL_FRAMEBUFFER_BINDING)
         glBindFramebuffer(self._bind_point, self.id)
+        self._update_size()
         glViewport(0, 0, self.width, self.height)
 
         return self
@@ -73,6 +78,25 @@ class Framebuffer:
 
         glBindFramebuffer(self._bind_point, self._prev_fbo_id)
 
+    def _update_size(self):
+        # This method is needed to be called with fbo binding
+        if self._pending_width < 0 and self._pending_height < 0:
+            return
+
+        self._width = self._pending_width
+        self._height = self._pending_height
+
+        self._setup_texture()
+        glFramebufferTexture2D(
+            self._bind_point,
+            self._attachment,
+            self._textarget,
+            self._texture.id,
+            0
+        )
+
+        self._pending_width = self._pending_height = -1
+
     @property
     def id(self):
         return self._id
@@ -88,8 +112,7 @@ class Framebuffer:
 
     @width.setter
     def width(self, value):
-        # width is a read-only property
-        raise AttributeError
+        self._pending_width = value
 
     @property
     def height(self):
@@ -97,8 +120,7 @@ class Framebuffer:
 
     @height.setter
     def height(self, value):
-        # height is a read-only property
-        raise AttributeError
+        self._pending_height = value
 
     @property
     def texture(self):
