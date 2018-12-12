@@ -66,7 +66,7 @@ class FlipRenderer(TextureRenderer):
     def width(self, value):
         if self.width != value:
             self._width = value
-            # todo: update_framebuffer
+            self._framebuffer.width = value
 
     @property
     def height(self):
@@ -76,4 +76,4 @@ class FlipRenderer(TextureRenderer):
     def height(self, value):
         if self.height != value:
             self._height = value
-            # todo: update_framebuffer
+            self._framebuffer.height = height
