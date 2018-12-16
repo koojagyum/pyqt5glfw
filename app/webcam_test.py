@@ -37,7 +37,7 @@ class VideoView(QQuickGLItem):
             inner_renderer=video
         )
 
-        self.renderer = video
+        self.renderer = flip
         self.play = play
 
         self.requestUpdate.connect(self._requestUpdate)
