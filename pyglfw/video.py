@@ -19,7 +19,10 @@ class FrameProvider:
         self.srcpath = srcpath
 
     def _load(self):
-        self._img = cv2.imread(self._srcpath)
+        if self._srcpath is None:
+            self._img = None
+        else:
+            self._img = cv2.imread(self._srcpath)
 
     @property
     def frame(self):
