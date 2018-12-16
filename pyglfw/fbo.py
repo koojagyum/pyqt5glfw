@@ -16,6 +16,7 @@ class Framebuffer:
 
         self._width = 0
         self._height = 0
+
         self._pending_width = -1
         self._pending_height = -1
 
