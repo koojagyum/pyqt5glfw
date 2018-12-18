@@ -14,8 +14,9 @@ class Framebuffer:
         self._prev_viewport = (0, 0, 1, 1)
         self._prev_fbo_id = -1
 
-        self._width = width
-        self._height = height
+        self._width = 0
+        self._height = 0
+
         self._pending_width = -1
         self._pending_height = -1
 
@@ -25,6 +26,9 @@ class Framebuffer:
         self._texformat = GL_RGB
         self._textarget = GL_TEXTURE_2D
 
+        self.width = width
+        self.height = height
+
         self._setup_texture()
         self._setup_framebuffer()
 
@@ -32,6 +36,10 @@ class Framebuffer:
         glDeleteFramebuffers(1, np.array([self.id]))
 
     def __enter__(self):
+        if (self.width <= 0 or self.height <= 0) and \
+           (self._check_pending_size() is False):
+            return None
+
         self._prev_viewport = glGetIntegerv(GL_VIEWPORT)
         self._prev_fbo_id = glGetIntegerv(GL_FRAMEBUFFER_BINDING)
         glBindFramebuffer(self._bind_point, self.id)
@@ -78,9 +86,15 @@ class Framebuffer:
 
         glBindFramebuffer(self._bind_point, self._prev_fbo_id)
 
+    def _check_pending_size(self):
+        if self._pending_width <= 0 and self._pending_height <= 0:
+            return False
+
+        return True
+
     def _update_size(self):
         # This method is needed to be called with fbo binding
-        if self._pending_width < 0 and self._pending_height < 0:
+        if not self._check_pending_size():
             return
 
         self._width = self._pending_width
@@ -112,7 +126,7 @@ class Framebuffer:
 
     @width.setter
     def width(self, value):
-        self._pending_width = value
+        self._pending_width = int(value)
 
     @property
     def height(self):
@@ -120,7 +134,7 @@ class Framebuffer:
 
     @height.setter
     def height(self, value):
-        self._pending_height = value
+        self._pending_height = int(value)
 
     @property
     def texture(self):

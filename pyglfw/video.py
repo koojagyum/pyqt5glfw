@@ -22,7 +22,6 @@ class FrameProvider:
         if self._srcpath is None:
             self._img = None
         else:
-            self._img = cv2.imread(self._srcpath)
             if self._img is not None:
                 h, w = self._img.shape[0], self._img.shape[1]
                 bb = 4 - (h % 4)

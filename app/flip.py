@@ -16,10 +16,16 @@ class FlipRenderer(TextureRenderer):
             width=100,
             height=100,
             inner_renderer=None):
-        self._width = width
-        self._height = height
+        self._pending_width = -1
+        self._pending_height = -1
+        self._width = 0
+        self._height = 0
         self._framebuffer = None
+
+        self.width = width
+        self.height = height
         self._inner_renderer = inner_renderer
+
         super().__init__(name=name)
 
     def prepare(self):
@@ -39,9 +45,12 @@ class FlipRenderer(TextureRenderer):
         self._vertexobj = VertexObject(v, [3, 2], e)
 
         self._inner_renderer.prepare()
-        self._framebuffer = Framebuffer(width=self.width, height=self.height)
 
     def render(self):
+        self._check_size()
+        if self._framebuffer is None:
+            return
+
         with self._framebuffer:
             glClearColor(0.0, 0.0, 0.0, 1.0)
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
@@ -51,8 +60,32 @@ class FlipRenderer(TextureRenderer):
 
     def dispose(self):
         super().dispose()
+
+        self._pending_width = self._width
+        self._pending_height = self._height
+        self._width = self._height = -1
+
         self._framebuffer = None
         self._inner_renderer.dispose()
+
+    def _check_size(self):
+        if self._pending_width < 0 and \
+           self._pending_height < 0:
+            return False
+
+        if self._pending_width >= 0:
+            self._width = self._pending_width
+        if self._pending_height >= 0:
+            self._height = self._pending_height
+        self._pending_width = self._pending_height = -1
+
+        if self._framebuffer is None:
+            self._framebuffer = Framebuffer(width=self.width, height=self.height)
+        else:
+            self._framebuffer.width = self.width
+            self._framebuffer.height = self.height
+
+        return True
 
     @property
     def texture(self):
@@ -65,8 +98,7 @@ class FlipRenderer(TextureRenderer):
     @width.setter
     def width(self, value):
         if self.width != value:
-            self._width = value
-            self._framebuffer.width = value
+            self._pending_width = value
 
     @property
     def height(self):
@@ -75,5 +107,4 @@ class FlipRenderer(TextureRenderer):
     @height.setter
     def height(self, value):
         if self.height != value:
-            self._height = value
-            self._framebuffer.height = height
+            self._pending_height = value

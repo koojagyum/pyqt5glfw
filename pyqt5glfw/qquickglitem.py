@@ -121,6 +121,10 @@ class QQuickRenderer(QQuickFramebufferObject.Renderer):
 
     @renderer.setter
     def renderer(self, value):
+        if self.renderer is not None and \
+           self.renderer is value:
+            return
+
         if self._next_renderer != value:
             if value is not None and \
                not isinstance(value, RendererBase):
