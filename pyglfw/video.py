@@ -19,7 +19,20 @@ class FrameProvider:
         self.srcpath = srcpath
 
     def _load(self):
-        self._img = cv2.imread(self._srcpath)
+        if self._srcpath is None:
+            self._img = None
+        else:
+            self._img = cv2.imread(self._srcpath)
+            if self._img is not None:
+                h, w = self._img.shape[0], self._img.shape[1]
+                bb = 4 - (h % 4)
+                rb = 4 - (w % 4)
+                self._img = cv2.copyMakeBorder(
+                    self._img,
+                    top=0, bottom=bb,
+                    left=0, right=rb,
+                    borderType=cv2.BORDER_REPLICATE
+                )
 
     @property
     def frame(self):
