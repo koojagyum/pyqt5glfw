@@ -102,7 +102,8 @@ class ColorModel:
                  name='',
                  vertices=None,
                  edges=None, faces=None,
-                 color=None, attributes=None):
+                 color=None, attributes=None,
+                 draw_point=True):
         self.name = name
         self._vertices = None
         self._color = None
@@ -110,12 +111,11 @@ class ColorModel:
         self._vertices_pending = None
         self._color_pending = None
         self._attrs_pending = None
+        self.draw_point = draw_point
 
         self._vertexobj = None
         self._indexobj_edges = None
         self._indexobj_faces = None
-
-        self.draw_mode = 'points'
 
         self.vertices = vertices
         self.attrs = attributes
@@ -148,8 +148,9 @@ class ColorModel:
             return
 
         with self._vertexobj as vo:
-            glPointSize(8)
-            glDrawArrays(GL_POINTS, 0, vo.vertex_count)
+            if self.draw_point:
+                glPointSize(8)
+                glDrawArrays(GL_POINTS, 0, vo.vertex_count)
             if self._indexobj_edges is not None:
                 with self._indexobj_edges as ebo:
                     glDrawElements(
