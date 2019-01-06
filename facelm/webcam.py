@@ -1,7 +1,9 @@
 import cv2
+import math
 import numpy as np
 import time
 
+from . import pose
 from threading import Thread
 # Sync using Condition causes critical performance down
 # from threading import Condition
@@ -146,11 +148,33 @@ def test_webcam():
         for shape in shapes:
             _draw_shape(image, shape)
 
+    def _draw_pose(image, shape, color=(0, 255, 0)):
+        yaw, pitch, roll = pose.headposeof(shape, image)
+        yaw, pitch, roll = math.degrees(yaw), \
+                           math.degrees(pitch), \
+                           math.degrees(roll)
+        text = '{}, {}, {}'.format(int(yaw), int(pitch), int(roll))
+        cv2.putText(
+            image,
+            text,
+            (0, 60),
+            cv2.FONT_HERSHEY_SIMPLEX,
+            1,
+            color,
+            1,
+            cv2.LINE_AA
+        )
+
+    def _draw_poses(image, shapes):
+        for shape in shapes:
+            _draw_pose(image, shape)
+
     def _block(frame):
         rects, shapes = detector.detect(frame)
         if len(rects) > 0:
             _draw_bboxes(frame, rects)
             _draw_shapes(frame, shapes)
+            _draw_poses(frame, shapes)
         return frame
 
     with Webcam() as video:
