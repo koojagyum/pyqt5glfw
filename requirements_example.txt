@@ -6,3 +6,4 @@ Pillow
 PyOpenGL
 pyqt5
 pyrr
+tqdm

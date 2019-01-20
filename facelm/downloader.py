@@ -7,6 +7,7 @@ import urllib.request
 from os.path import abspath
 from os.path import isfile
 from os.path import join
+from tqdm import tqdm
 
 
 MODEL_URL = 'http://dlib.net/files/shape_predictor_68_face_landmarks.dat.bz2'
@@ -56,17 +57,21 @@ def download(url, dirpath='.'):
 
         file_size_dl = 0
         block_sz = 8192
+
+        t = tqdm(
+            total=file_size//1024,
+            unit='Byte',
+            unit_scale=True,
+        )
         while True:
             buf = u.read(block_sz)
             if not buf:
                 break
 
-            file_size_dl += len(buf)
             f.write(buf)
-            status = build_format(file_size_dl, file_size)
-            status = status + chr(8)*(len(status)+1)
-            print_overline(status)
+            t.update(n=len(buf))
 
+        t. close()
         print('\nDone')
         return filepath
 
