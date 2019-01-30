@@ -4,12 +4,10 @@ import math
 import numpy as np
 import os
 
-from util.geo import to_scr
-
 
 def headposeof(lm, img):
     # 3D model points
-    ref_indices = [33, 8, 36, 45, 48, 54]
+    ref_indices = [30, 8, 36, 45, 48, 54]
     image_pts = lm[ref_indices].astype(np.float32)
     model_pts = np.array([
         (0.0, 0.0, 0.0),             # Nose tip
@@ -17,7 +15,7 @@ def headposeof(lm, img):
         (-225.0, 170.0, -135.0),     # Left eye left corner
         (225.0, 170.0, -135.0),      # Right eye right corne
         (-150.0, -150.0, -125.0),    # Left Mouth corner
-        (150.0, -150.0, -125.0)      # Right mouth corner                     
+        (150.0, -150.0, -125.0)      # Right mouth corner
     ], dtype=np.float32)
 
     # Camera internals
