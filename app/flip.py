@@ -40,7 +40,7 @@ class FlipRenderer(TextureRenderer):
         e = np.array(
             [0, 1, 2,
              1, 3, 2],
-            dtype='uint8'
+            dtype='uint16'
         )
         self._vertexobj = VertexObject(v, [3, 2], e)
 

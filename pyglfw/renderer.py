@@ -81,8 +81,9 @@ class Renderer(RendererBase):
 
 class RendererGroup(Renderer):
 
-    def __init__(self, name=''):
+    def __init__(self, name='', reset_depth=False):
         self.name = name
+        self.reset_depth = reset_depth
         self.renderers = []
 
     def prepare(self):
@@ -95,6 +96,8 @@ class RendererGroup(Renderer):
 
     def render(self):
         for r in self.renderers:
+            if self.reset_depth:
+                glClear(GL_DEPTH_BUFFER_BIT)
             r.render()
 
     def dispose(self):
@@ -152,7 +155,7 @@ class RectangleRenderer(Renderer):
         e = np.array(
             [0, 1, 2,
              1, 3, 2],
-            dtype='uint8'
+            dtype='uint16'
         )
         self._vertexobj = VertexObject(v, [3, 3], e)
 
@@ -162,7 +165,7 @@ class RectangleRenderer(Renderer):
                 glDrawElements(
                     GL_TRIANGLES,
                     vo.element_count,
-                    GL_UNSIGNED_BYTE,
+                    GL_UNSIGNED_SHORT,
                     None
                 )
 
@@ -210,7 +213,7 @@ class TextureRenderer(Renderer):
         e = np.array(
             [0, 1, 2,
              1, 3, 2],
-            dtype='uint8'
+            dtype='uint16'
         )
         self._vertexobj = VertexObject(v, [3, 2], e)
         self._texture = Texture()
@@ -229,7 +232,7 @@ class TextureRenderer(Renderer):
                     glDrawElements(
                         GL_TRIANGLES,
                         vo.element_count,
-                        GL_UNSIGNED_BYTE,
+                        GL_UNSIGNED_SHORT,
                         None
                     )
 
