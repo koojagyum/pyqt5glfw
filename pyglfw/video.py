@@ -22,10 +22,11 @@ class FrameProvider:
         if self._srcpath is None:
             self._img = None
         else:
+            self._img = cv2.imread(self._srcpath)
             if self._img is not None:
                 h, w = self._img.shape[0], self._img.shape[1]
-                bb = 4 - (h % 4)
-                rb = 4 - (w % 4)
+                bb = (4 - (h % 4)) % 4
+                rb = (4 - (w % 4)) % 4
                 self._img = cv2.copyMakeBorder(
                     self._img,
                     top=0, bottom=bb,
@@ -50,13 +51,13 @@ class FrameProvider:
     @property
     def width(self):
         if self._img is not None:
-            return self._img.shape[0]
+            return self._img.shape[1]
         return 0.0
 
     @property
     def height(self):
         if self._img is not None:
-            return self._img.shape[1]
+            return self._img.shape[0]
         return 0.0
 
     @property
@@ -71,6 +72,7 @@ class Webcam:
 
     def __init__(self):
         self._img = None
+        self._run = False
         self._cap = None
         self._cap_cond = Condition()
 
@@ -84,6 +86,9 @@ class Webcam:
 
     # Create thread for capturing image
     def start(self):
+        if self.run:
+            return
+
         self._run = True
         self._thread = Thread(
             target=self._update_frame,
@@ -92,6 +97,9 @@ class Webcam:
         self._thread.start()
 
     def stop(self):
+        if not self.run:
+            return
+
         self._run = False
         self._thread.join()
 
@@ -114,7 +122,7 @@ class Webcam:
 
     @property
     def run(self):
-        return _run
+        return self._run
 
     @property
     def width(self):
@@ -143,7 +151,9 @@ class Webcam:
 class VideoPlayer(Webcam):
 
     def __init__(self, srcpath=None):
+        # FIXME: Eliminate duplications
         self._img = None
+        self._run = False
         self._srcpath = None
         self._cap = None
         self._cap_cond = Condition()
