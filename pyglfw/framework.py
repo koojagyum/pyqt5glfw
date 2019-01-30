@@ -70,7 +70,7 @@ class VertexObject:
 
     # vertices: float numpy array (1d)
     # alignment: int Python array
-    # indices: uint8 numpy array
+    # indices: uint16 numpy array
     def __init__(self, vertices, alignment, indices=None):
         self._vbo = 0
         self._vao = 0

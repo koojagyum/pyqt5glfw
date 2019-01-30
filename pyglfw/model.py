@@ -40,8 +40,8 @@ def load_model(desc, basepath='.'):
         return os.path.join(basepath, dic[key])
 
     vertices = _pick_nparray('vertices', desc, dtype=np.float32)
-    edges = _pick_nparray('edges', desc, dtype=np.uint8)
-    faces = _pick_nparray('faces', desc, dtype=np.uint8)
+    edges = _pick_nparray('edges', desc, dtype=np.uint16)
+    faces = _pick_nparray('faces', desc, dtype=np.uint16)
     color = _pick_nparray('color', desc, dtype=np.float32)
     material_desc = _pick('material', desc)
 
@@ -103,7 +103,8 @@ class ColorModel:
                  vertices=None,
                  edges=None, faces=None,
                  color=None, attributes=None,
-                 draw_point=True):
+                 draw_point=True,
+                 wireframe=False):
         self.name = name
         self._vertices = None
         self._color = None
@@ -117,8 +118,11 @@ class ColorModel:
         self._indexobj_edges = None
         self._indexobj_faces = None
 
+        self.draw_mode = 'points'
+
         self.vertices = vertices
         self.attrs = attributes
+        self.wireframe = wireframe
 
         if color is None and \
            (attributes is None or \
@@ -156,17 +160,21 @@ class ColorModel:
                     glDrawElements(
                         GL_LINES,
                         ebo.count,
-                        GL_UNSIGNED_BYTE,
+                        GL_UNSIGNED_SHORT,
                         None
                     )
             if self._indexobj_faces is not None:
                 with self._indexobj_faces as ebo:
+                    if self.wireframe:
+                        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE)
                     glDrawElements(
                         GL_TRIANGLES,
                         ebo.count,
-                        GL_UNSIGNED_BYTE,
+                        GL_UNSIGNED_SHORT,
                         None
                     )
+                    if self.wireframe:
+                        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL)
 
     def dispose(self):
         self._indexobj_edges = None
@@ -402,7 +410,7 @@ class TextureModel:
                         glDrawElements(
                             GL_LINES,
                             ebo.count,
-                            GL_UNSIGNED_BYTE,
+                            GL_UNSIGNED_SHORT,
                             None
                         )
                 if self._indexobj_faces is not None:
@@ -410,7 +418,7 @@ class TextureModel:
                         glDrawElements(
                             GL_TRIANGLES,
                             ebo.count,
-                            GL_UNSIGNED_BYTE,
+                            GL_UNSIGNED_SHORT,
                             None
                         )
 
