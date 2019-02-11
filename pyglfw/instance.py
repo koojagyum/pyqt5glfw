@@ -94,10 +94,12 @@ class MonoInstanceRenderer(Renderer):
         self.camera = camera
 
     def add_instance(self, instance):
-        self._pending_adds.append(instance)
+        if isinstance(instance, ModelInstance):
+            self._pending_adds.append(instance)
 
     def remove_instance(self, instance):
-        self._pending_deletes.append(instance)
+        if isinstance(instance, ModelInstance):
+            self._pending_deletes.append(instance)
 
     def clear_instances(self):
         for i in self.instances:
