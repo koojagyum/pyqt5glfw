@@ -26,6 +26,11 @@ def debug(msg):
 class QQuickGLItem(QQuickFramebufferObject):
 
     keyPressed = pyqtSignal(int, bool)
+    # Mouse events are delivered as following format
+    # 1. (int) btn type: 1: left, 2: right, 3: middle
+    # 2. (int) btn status: 1: press, 2: release, 0: move
+    # 3,4 (int) position
+    mouseEvent = pyqtSignal(int, int, int, int)  # type, status, pos
 
     def __init__(self, parent=None):
         super(QQuickGLItem, self).__init__(
@@ -37,6 +42,7 @@ class QQuickGLItem(QQuickFramebufferObject):
         self.windowChanged.connect(self._onWindowChanged)
         self.setProperty('focus', True)
         self.setProperty('mirrorVertically', True)
+        self.setAcceptedMouseButtons(Qt.AllButtons)
 
         # from pyglfw.scene import load_fromjson
         # scene = load_fromjson('example/res/scene_rectangle.json')
@@ -52,6 +58,36 @@ class QQuickGLItem(QQuickFramebufferObject):
         shift = event.modifiers() & Qt.ShiftModifier
         self.keyPressed.emit(event.key(), shift)
         self.update()
+
+    def mousePressEvent(self, event):
+        self.lastPos = event.pos()
+        debug(self.lastPos)
+        self.mouseEvent.emit(
+            event.button(),
+            1,
+            self.lastPos.x(),
+            self.lastPos.y()
+        )
+
+    def mouseReleaseEvent(self, event):
+        self.lastPos = event.pos()
+        debug(self.lastPos)
+        self.mouseEvent.emit(
+            event.button(),
+            2,
+            self.lastPos.x(),
+            self.lastPos.y()
+        )
+
+    def mouseMoveEvent(self, event):
+        self.lastPos = event.pos()
+        self.mouseEvent.emit(
+            event.button(),
+            0,
+            self.lastPos.x(),
+            self.lastPos.y()
+        )
+        self.update()  # FIXME: Need to filter out!
 
     def _onWindowChanged(self, window):
         if window is not None:
