@@ -21,6 +21,11 @@ def debug(msg):
 class GLWidget(QOpenGLWidget):
 
     keyPressed = pyqtSignal(int, bool)
+    # Mouse events are delivered as following format
+    # 1. (int) btn type: 1: left, 2: right, 3: middle
+    # 2. (int) btn status: 1: press, 2: release, 0: move
+    # 3,4 (int) position
+    mouseEvent = pyqtSignal(int, int, int, int)  # type, status, pos
 
     def __init__(self, parent=None):
         super(GLWidget, self).__init__(parent)
@@ -28,6 +33,8 @@ class GLWidget(QOpenGLWidget):
         self.lastPos = QPoint()
         self._renderer = None
         self._next_renderer = None
+
+        self.setMouseTracking(True)
 
     def getOpenglInfo(self):
         info = """
@@ -93,9 +100,32 @@ class GLWidget(QOpenGLWidget):
     def mousePressEvent(self, event):
         self.lastPos = event.pos()
         debug(self.lastPos)
+        self.mouseEvent.emit(
+            event.button(),
+            1,
+            self.lastPos.x(),
+            self.lastPos.y()
+        )
+
+    def mouseReleaseEvent(self, event):
+        self.lastPos = event.pos()
+        debug(self.lastPos)
+        self.mouseEvent.emit(
+            event.button(),
+            2,
+            self.lastPos.x(),
+            self.lastPos.y()
+        )
 
     def mouseMoveEvent(self, event):
         self.lastPos = event.pos()
+        self.mouseEvent.emit(
+            event.button(),
+            0,
+            self.lastPos.x(),
+            self.lastPos.y()
+        )
+        self.update()  # FIXME: Need to filter out!
 
     def keyPressEvent(self, event):
         super(GLWidget, self).keyPressEvent(event)
