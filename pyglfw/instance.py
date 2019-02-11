@@ -89,7 +89,30 @@ class MonoInstanceRenderer(Renderer):
         )
 
         self.instances = []
+        self._pending_adds = []
+        self._pending_deletes = []
         self.camera = camera
+
+    def add_instance(self, instance):
+        self._pending_adds.append(instance)
+
+    def remove_instance(self, instance):
+        self._pending_deletes.append(instance)
+
+    def clear_instances(self):
+        for i in self.instances:
+            self.remove_instance(i)
+        for i in self._pending_adds:
+            self.remove_instance(i)
+
+    def _check_update(self):
+        for i in self._pending_deletes:
+            self.instances.remove(i)
+        for i in self._pending_adds:
+            self.instances.append(i)
+
+        self._pending_adds = []
+        self._pending_deletes = []
 
     def prepare(self):
         super().prepare()
@@ -107,6 +130,8 @@ class MonoInstanceRenderer(Renderer):
 
     def render(self):
         super().render()
+
+        self._check_update()
 
         if len(self.instances) == 0:
             return
