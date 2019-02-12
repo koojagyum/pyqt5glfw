@@ -138,12 +138,7 @@ class ColorModel:
         self._faces = faces
 
     def prepare(self):
-        if self._edges is not None and \
-           self._indexobj_edges is None:
-            self._indexobj_edges = IndexObject(self._edges)
-        if self._faces is not None and \
-           self._indexobj_faces is None:
-            self._indexobj_faces = IndexObject(self._faces)
+        self._check_ebo()
 
     def draw(self, program):
         self._update_geometry()
@@ -180,7 +175,17 @@ class ColorModel:
         self._indexobj_edges = None
         self._indexobj_faces = None
 
+    def _check_ebo(self):
+        if self._edges is not None and \
+           self._indexobj_edges is None:
+            self._indexobj_edges = IndexObject(self._edges)
+        if self._faces is not None and \
+           self._indexobj_faces is None:
+            self._indexobj_faces = IndexObject(self._faces)
+
     def _update_geometry(self):
+        self._check_ebo()
+
         if not self._check_pending_data():
             return
 
