@@ -263,6 +263,8 @@ class ColorModel:
 
     @property
     def vertices(self):
+        if self._vertices_pending is not None:
+            return self._vertices_pending
         return self._vertices
 
     @vertices.setter
@@ -271,6 +273,8 @@ class ColorModel:
 
     @property
     def color(self):
+        if self._color_pending is not None:
+            return self._color_pending
         return self._color
 
     @color.setter
@@ -283,6 +287,8 @@ class ColorModel:
 
     @property
     def attrs(self):
+        if self._attrs_pending is not None:
+            return self._attrs_pending
         return self._attrs
 
     @attrs.setter
