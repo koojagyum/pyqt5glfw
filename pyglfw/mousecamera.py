@@ -4,7 +4,7 @@ import numpy as np
 from pyglfw.camera import Camera
 
 
-verbose = True
+verbose = False
 
 
 def debug(msg):

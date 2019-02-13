@@ -5,7 +5,7 @@ import pyrr
 from PyQt5.QtCore import Qt
 
 
-verbose = True
+verbose = False
 
 
 def debug(msg):
