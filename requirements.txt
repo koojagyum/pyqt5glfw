@@ -1,3 +1,5 @@
+dlib
+matplotlib
 numpy
 opencv-python
 Pillow
