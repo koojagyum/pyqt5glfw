@@ -30,12 +30,16 @@ class ModelInstance:
         self.translation = translation
         self.rotation = rotation
         self.scale = scale
+        self.show = True
 
     def prepare(self):
         if self.model:
             self.model.prepare()
 
     def draw(self, program):
+        if not self.show:
+            return
+
         if self.model:
             program.setMatrix4('model', self.model_matrix)
             self.model.draw(program)
