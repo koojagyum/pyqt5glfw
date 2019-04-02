@@ -15,6 +15,7 @@ from pyglfw.framework import IndexObject
 from pyglfw.framework import VertexObject
 
 
+gl_point_size = 6
 verbose = True
 
 
@@ -148,7 +149,7 @@ class ColorModel:
 
         with self._vertexobj as vo:
             if self.draw_point:
-                glPointSize(8)
+                glPointSize(gl_point_size)
                 glDrawArrays(GL_POINTS, 0, vo.vertex_count)
             if self._indexobj_edges is not None:
                 with self._indexobj_edges as ebo:
@@ -414,7 +415,7 @@ class TextureModel:
 
         with self.material(program):
             with self._vertexobj as vo:
-                glPointSize(8)
+                glPointSize(gl_point_size)
                 glDrawArrays(GL_POINTS, 0, vo.vertex_count)
                 if self._indexobj_edges is not None:
                     with self._indexobj_edges as ebo:
