@@ -273,6 +273,10 @@ class ColorModel:
         self._vertices_pending = value
 
     @property
+    def faces(self):
+        return self._faces
+
+    @property
     def color(self):
         if self._color_pending is not None:
             return self._color_pending
