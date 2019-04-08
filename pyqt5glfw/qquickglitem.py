@@ -3,9 +3,11 @@ import sys
 
 from OpenGL.GL import *
 
+from PyQt5.QtCore import pyqtProperty
 from PyQt5.QtCore import pyqtSignal
 from PyQt5.QtCore import QUrl
 from PyQt5.QtCore import Qt
+from PyQt5.QtGui import QColor
 from PyQt5.QtGui import QGuiApplication
 from PyQt5.QtGui import QOpenGLFramebufferObject, QOpenGLFramebufferObjectFormat
 from PyQt5.QtQuick import QQuickView
@@ -39,6 +41,7 @@ class QQuickGLItem(QQuickFramebufferObject):
 
         self.renderer = None
         self._qrenderer = None
+        self._qcolor = QColor.fromRgbF(0.0, 0.0, 0.0)
         self.windowChanged.connect(self._onWindowChanged)
         self.setProperty('focus', True)
         self.setProperty('mirrorVertically', True)
@@ -99,6 +102,18 @@ class QQuickGLItem(QQuickFramebufferObject):
     def _onInvalidateUnderlay(self):
         self.setProperty('focus', False)
 
+    @pyqtProperty(str)
+    def color(self):
+        return self._qcolor.name()
+
+    @color.setter
+    def color(self, value):
+        self._qcolor = QColor(value)
+
+    @property
+    def qcolor(self):
+        return self._qcolor
+
 
 class QQuickRenderer(QQuickFramebufferObject.Renderer):
 
@@ -109,10 +124,16 @@ class QQuickRenderer(QQuickFramebufferObject.Renderer):
         self._window = None
         self._renderer = None
         self._next_renderer = None
+        self._qcolor = QColor.fromRgbF(0.0, 0.0, 0.0)
 
     def render(self):
         # todo: specify color
-        glClearColor(0.0, 0.0, 0.0, 1.0)
+        glClearColor(
+            self._qcolor.getRgbF()[0],
+            self._qcolor.getRgbF()[1],
+            self._qcolor.getRgbF()[2],
+            self._qcolor.getRgbF()[3]
+        )
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
 
         switched = self._check_next_renderer()
@@ -138,6 +159,7 @@ class QQuickRenderer(QQuickFramebufferObject.Renderer):
     def synchronize(self, item):
         # update data from main thread
         self._window = item.window()
+        self._qcolor = item.qcolor
         self.renderer = item.renderer
 
     def _check_next_renderer(self):
